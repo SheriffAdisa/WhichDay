@@ -11,7 +11,7 @@ public interface WeatherApi {
   @GET("data/2.5/forecast")  //WeatherResponse would be a Java class that matches the JSON structure returned by the weather API
   Call<WeatherResponse> getWeatherByCityName(
           @Query("q") String cityName,  //user's city
-          @Query("appid") String apiKey, //my Weather api key
-          @Query("units") String units  //converts the temperature to celcius
+          @Query("appid") String apiKey //my Weather api key
+          //converts the temperature to celcius
   );
 }
