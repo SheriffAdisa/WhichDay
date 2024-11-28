@@ -3,27 +3,58 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:gravity="center"
+    android:background="#f5f5f5"
+    >
+
 
     <!--User Input text box-->
     <EditText
         android:id="@+id/editTextCity"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Enter City Name" />
+        android:hint="Enter City Name"
+        android:padding="10dp"
+        android:background="@drawable/edit_text_background"
+        android:layout_marginBottom="16dp"
+        android:inputType="text"
+        />
 
     <!--Get Weather Button-->
     <Button
         android:id="@+id/buttonFetchWeather"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Fetch Weather" />
+        android:text="Get Weather"
+
+        android:textColor="#ffffff"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- ProgressBar -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_marginBottom="16dp"/>
+
+    <ImageView
+        android:id="@+id/weatherIcon"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginBottom="16dp"
+        android:contentDescription="Weather Icon"/>
 
     <!--Weather Result button-->
     <TextView
         android:id="@+id/weatherResult"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Weather Info will appear here"
-        android:paddingTop="16dp" />
+        android:gravity="center"
+        android:textSize="18sp"
+        android:textColor="#333333"
+        android:text="Weather Details Will Appear Here"
+        android:padding="10dp"
+        android:background="@drawable/text_view_background" />
 </LinearLayout>
