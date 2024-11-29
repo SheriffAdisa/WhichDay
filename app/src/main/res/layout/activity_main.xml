@@ -17,7 +17,7 @@
         android:hint="Enter City Name"
         android:padding="10dp"
         android:background="@drawable/edit_text_background"
-        android:layout_marginBottom="16dp"
+        android:layout_margin="16dp"
         android:inputType="text"
         />
 
@@ -27,9 +27,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Get Weather"
-
         android:textColor="#ffffff"
-        android:layout_marginBottom="16dp"/>
+        android:layout_below="@id/editTextCity"
+        android:layout_margin="16dp" />
 
     <!-- ProgressBar -->
     <ProgressBar
@@ -57,4 +57,15 @@
         android:text="Weather Details Will Appear Here"
         android:padding="10dp"
         android:background="@drawable/text_view_background" />
+
+
+    <!-- Google Maps -->
+    <fragment
+        android:id="@+id/mapFragment"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/weatherResult" />
+
 </LinearLayout>
+
