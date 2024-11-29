@@ -13,3 +13,7 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+OPENWEATHER_API_KEY=796b2ffe49982b3d99a31e32d87ff3ef
+GOOGLE_MAPS_API_KEY=AIzaSyCNvbZUQmHLWz_4mVYv7wX0YQPWGRl_XuM
+
