@@ -2,14 +2,24 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:padding="16dp"
-    android:gravity="center"
-    android:background="#f5f5f5"
-    >
+    android:background="#ffffff">
 
+    <!-- CardView for Google Maps -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        app:cardCornerRadius="20dp">
+        <fragment
+            android:id="@+id/mapFragment"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </androidx.cardview.widget.CardView>
 
-    <!--User Input text box-->
+    <!-- User Input (City Name) -->
     <EditText
         android:id="@+id/editTextCity"
         android:layout_width="match_parent"
@@ -18,38 +28,39 @@
         android:padding="10dp"
         android:background="@drawable/edit_text_background"
         android:layout_margin="16dp"
-        android:inputType="text"
-        />
+        android:inputType="text" />
 
-    <!--Get Weather Button-->
+    <!-- Get Weather Button -->
     <Button
         android:id="@+id/buttonFetchWeather"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:enabled="true"
-        android:layout_below="@id/editTextCity"
         android:layout_marginTop="16dp"
         android:background="#3F51B5"
         android:text="Get Weather"
-        android:textColor="#FFFFFF" />
+        android:textColor="#FFFFFF"
+        android:layout_gravity="center" />
 
-
-    <!-- ProgressBar -->
+    <!-- ProgressBar (Loading Indicator) -->
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        android:layout_marginBottom="16dp"/>
+        android:layout_gravity="center"
+        android:layout_marginTop="16dp" />
 
+    <!-- Weather Icon -->
     <ImageView
         android:id="@+id/weatherIcon"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_marginBottom="16dp"
-        android:contentDescription="Weather Icon"/>
+        android:layout_gravity="center"
+        android:contentDescription="Weather Icon"
+         />
 
-    <!--Weather Result button-->
+    <!-- Weather Result -->
     <TextView
         android:id="@+id/weatherResult"
         android:layout_width="match_parent"
@@ -61,14 +72,4 @@
         android:padding="10dp"
         android:background="@drawable/text_view_background" />
 
-
-    <!-- Google Maps -->
-    <fragment
-        android:id="@+id/mapFragment"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/weatherResult" />
-
 </LinearLayout>
-
