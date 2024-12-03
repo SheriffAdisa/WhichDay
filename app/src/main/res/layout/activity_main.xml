@@ -7,11 +7,24 @@
     android:padding="16dp"
     android:background="#ffffff">
 
+    <!-- Recommended Day Text -->
+    <TextView
+        android:id="@+id/recommendedDay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Recommended Day: Will appear here"
+        android:textSize="18sp"
+        android:textColor="#333333"
+        android:padding="10dp"
+        android:gravity="center"
+        android:layout_marginBottom="16dp" />
+
     <!-- CardView for Google Maps -->
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="200dp"
         app:cardCornerRadius="20dp">
+        <!-- Google Maps Fragment -->
         <fragment
             android:id="@+id/mapFragment"
             android:name="com.google.android.gms.maps.SupportMapFragment"
@@ -50,26 +63,10 @@
         android:layout_gravity="center"
         android:layout_marginTop="16dp" />
 
-    <!-- Weather Icon -->
-    <ImageView
-        android:id="@+id/weatherIcon"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_marginBottom="16dp"
-        android:layout_gravity="center"
-        android:contentDescription="Weather Icon"
-         />
-
-    <!-- Weather Result -->
-    <TextView
-        android:id="@+id/weatherResult"
+    <!-- ListView for Forecast -->
+    <ListView
+        android:id="@+id/forecastList"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:textSize="18sp"
-        android:textColor="#333333"
-        android:text="Weather Details Will Appear Here"
-        android:padding="10dp"
-        android:background="@drawable/text_view_background" />
+        android:layout_height="match_parent" />
 
 </LinearLayout>
