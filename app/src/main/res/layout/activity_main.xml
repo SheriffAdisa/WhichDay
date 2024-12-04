@@ -33,15 +33,19 @@
     </androidx.cardview.widget.CardView>
 
     <!-- User Input (City Name) -->
-    <EditText
-        android:id="@+id/editTextCity"
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Enter City Name"
-        android:padding="10dp"
-        android:background="@drawable/edit_text_background"
-        android:layout_margin="16dp"
-        android:inputType="text" />
+        android:layout_marginTop="16dp"
+        app:hintEnabled="true"
+        app:hintAnimationEnabled="true"
+        android:hint="Enter City Name">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editTextCity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Get Weather Button -->
     <Button

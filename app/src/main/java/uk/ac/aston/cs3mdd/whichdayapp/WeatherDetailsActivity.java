@@ -13,6 +13,8 @@ import uk.ac.aston.cs3mdd.whichdayapp.models.DaySummary;
 
 public class WeatherDetailsActivity extends AppCompatActivity {
 
+
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -21,7 +23,7 @@ public class WeatherDetailsActivity extends AppCompatActivity {
     // Enable the back button in the action bar
     if (getSupportActionBar() != null) {
       getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-      getSupportActionBar().setTitle("Weather Details"); // Optional: Set title
+      getSupportActionBar().setTitle("Your Recommendation"); // Set title
     }
 
     // Get references to the UI elements
@@ -38,6 +40,8 @@ public class WeatherDetailsActivity extends AppCompatActivity {
     // Display the 5-day forecast in the ListView
     ArrayAdapter<DaySummary> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, summaries);
     forecastListView.setAdapter(adapter);
+
+
   }
 
   @Override
@@ -49,5 +53,6 @@ public class WeatherDetailsActivity extends AppCompatActivity {
     }
     return super.onOptionsItemSelected(item);
   }
+
 
 }
