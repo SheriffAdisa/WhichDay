@@ -4,33 +4,11 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
+    android:layout_gravity="center"
     android:padding="16dp"
     android:background="#ffffff">
 
-    <!-- Recommended Day Text -->
-    <TextView
-        android:id="@+id/recommendedDay"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Recommended Day: Will appear here"
-        android:textSize="18sp"
-        android:textColor="#333333"
-        android:padding="10dp"
-        android:gravity="center"
-        android:layout_marginBottom="16dp" />
 
-    <!-- CardView for Google Maps -->
-    <androidx.cardview.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        app:cardCornerRadius="20dp">
-        <!-- Google Maps Fragment -->
-        <fragment
-            android:id="@+id/mapFragment"
-            android:name="com.google.android.gms.maps.SupportMapFragment"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-    </androidx.cardview.widget.CardView>
 
     <!-- User Input (City Name) -->
     <com.google.android.material.textfield.TextInputLayout
@@ -39,6 +17,7 @@
         android:layout_marginTop="16dp"
         app:hintEnabled="true"
         app:hintAnimationEnabled="true"
+
         android:hint="Enter City Name">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -53,10 +32,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:background="#3F51B5"
         android:text="Get Weather"
-        android:textColor="#FFFFFF"
+        android:background="@color/buttonBackground"
+        android:textColor="@color/buttonTextColor"
         android:layout_gravity="center" />
+
+
 
     <!-- ProgressBar (Loading Indicator) -->
     <ProgressBar
@@ -65,12 +46,9 @@
         android:layout_height="wrap_content"
         android:visibility="gone"
         android:layout_gravity="center"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="16dp"
+        android:contentDescription="Loading weather information" />
 
-    <!-- ListView for Forecast -->
-    <ListView
-        android:id="@+id/forecastList"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+
 
 </LinearLayout>
