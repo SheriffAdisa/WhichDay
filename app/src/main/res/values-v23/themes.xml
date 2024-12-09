@@ -1,9 +1,8 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-
-    <style name="Theme.WhichDayApp" parent="Base.Theme.WhichDayApp">
-        <!-- Transparent system bars for edge-to-edge. -->
-        <item name="android:navigationBarColor">@android:color/transparent</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:windowLightStatusBar">?attr/isLightTheme</item>
+<resources>
+    <style name="Theme.WhichDayApp" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <!-- Additional styles for API 23+ -->
     </style>
 </resources>

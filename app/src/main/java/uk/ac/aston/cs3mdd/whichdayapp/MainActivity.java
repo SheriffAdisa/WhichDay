@@ -1,136 +1,148 @@
 package uk.ac.aston.cs3mdd.whichdayapp;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 
-import androidx.fragment.app.FragmentActivity;
+import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import uk.ac.aston.cs3mdd.whichdayapp.models.DaySummary;
 import uk.ac.aston.cs3mdd.whichdayapp.models.WeatherItem;
 import uk.ac.aston.cs3mdd.whichdayapp.models.WeatherResponse;
 
-public class MainActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MainActivity extends AppCompatActivity {
 
-  private static final String BASE_URL = "https://api.openweathermap.org/"; // OpenWeatherMap base URL
-  private static final String API_KEY = "796b2ffe49982b3d99a31e32d87ff3ef"; // OpenWeatherMap API key
+  // OpenWeatherMap API base URL and key
+  private static final String BASE_URL = "https://api.openweathermap.org/";
+  private static final String API_KEY = "796b2ffe49982b3d99a31e32d87ff3ef";
 
-  // UI Components
-  private EditText editTextCity; // User input for city name
-  private Button buttonFetchWeather; // Button to trigger fetching weather data
-  private TextView weatherResult; // Displays the weather data to the user
-  private ProgressBar progressBar; // Indicates loading state during API calls
-
-  // Google Map instance
-  private GoogleMap mMap;
+  // UI components
+  private EditText editTextCity;        // User input for city name
+  private Button buttonFetchWeather;   // Button to fetch weather data
+  private ProgressBar progressBar;     // Spinner to indicate loading
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
-    // Link UI components with their XML counterparts
+    // Linking UI components to XML
     editTextCity = findViewById(R.id.editTextCity);
     buttonFetchWeather = findViewById(R.id.buttonFetchWeather);
-    weatherResult = findViewById(R.id.weatherResult);
     progressBar = findViewById(R.id.progressBar);
 
-    // Set up the Google Map fragment
-    SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-            .findFragmentById(R.id.mapFragment);
-    mapFragment.getMapAsync(this);
-
-    // Set up button click listener to fetch weather data
+    // Set up button click listener
     buttonFetchWeather.setOnClickListener(view -> fetchWeatherData());
   }
 
-  // Called when the Google Map is ready to be used
-  @Override
-  public void onMapReady(GoogleMap googleMap) {
-    mMap = googleMap; // Store the map instance for later use
-  }
-
-  // Fetch weather data from the OpenWeatherMap API
+  // Fetch weather data from OpenWeatherMap API
   private void fetchWeatherData() {
-    String cityName = editTextCity.getText().toString().trim(); // Get user input and trim whitespace
+    String cityName = editTextCity.getText().toString().trim();
 
     if (!cityName.isEmpty()) {
-      progressBar.setVisibility(View.VISIBLE); // Show the ProgressBar when loading starts
+      progressBar.setVisibility(View.VISIBLE); // Show progress bar during API call
 
-      // Set up Retrofit for API calls
+      // Set up Retrofit for the API call
       Retrofit retrofit = new Retrofit.Builder()
-              .baseUrl(BASE_URL) // Base URL for OpenWeatherMap API
-              .addConverterFactory(GsonConverterFactory.create()) // Gson for JSON parsing
+              .baseUrl(BASE_URL)
+              .addConverterFactory(GsonConverterFactory.create())
               .build();
 
       WeatherApi weatherApi = retrofit.create(WeatherApi.class);
-
-      // Make an asynchronous API call to fetch weather data
       Call<WeatherResponse> call = weatherApi.getWeatherByCityName(cityName, API_KEY);
 
       call.enqueue(new Callback<WeatherResponse>() {
         @Override
         public void onResponse(Call<WeatherResponse> call, Response<WeatherResponse> response) {
-          progressBar.setVisibility(View.GONE); // Hide the ProgressBar when response is received
+          progressBar.setVisibility(View.GONE); // Hide progress bar
 
           if (response.isSuccessful() && response.body() != null) {
-            // Parse the response
             WeatherResponse weatherResponse = response.body();
 
-            // Extract city name and coordinates
-            String city = weatherResponse.getCity().getName(); // City name
-            double lat = weatherResponse.getCity().getCoord().getLat(); // Latitude
-            double lon = weatherResponse.getCity().getCoord().getLon(); // Longitude
+            // Extract necessary data
+            double cityLat = weatherResponse.getCity().getCoord().getLat();
+            double cityLon = weatherResponse.getCity().getCoord().getLon();
+            String cityName = weatherResponse.getCity().getName();
 
-            // Extract weather details
-            String description = weatherResponse.getList().get(0).getWeather().get(0).getDescription(); // Weather description
-            double temp = weatherResponse.getList().get(0).getMain().getTemp(); // Temperature in Kelvin
-            double tempCelsius = temp - 273.15; // Convert Kelvin to Celsius
-            String date = weatherResponse.getList().get(0).getDt_txt(); // Date and time
+            // Process weather data
+            Map<String, List<WeatherItem>> dailyForecasts = groupForecastsByDay(weatherResponse.getList());
+            List<DaySummary> summaries = calculateDailySummaries(dailyForecasts);
 
-            // Display weather data in the TextView
-            String weatherInfo = "City: " + city +
-                    "\nTemperature: " + String.format("%.2f", tempCelsius) + "°C" +
-                    "\nCondition: " + description +
-                    "\nDate: " + date;
+            // Find the recommended day
+            DaySummary bestDay = getBestDay(summaries);
 
-            weatherResult.setText(weatherInfo);
-
-            // Update the map with a marker at the city's location
-            LatLng cityLocation = new LatLng(lat, lon); // Create a LatLng object with the coordinates
-            mMap.clear(); // Clear any existing markers
-            mMap.addMarker(new MarkerOptions().position(cityLocation).title(city)); // Add a marker
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(cityLocation, 10)); // Move the camera to the marker
+            // Navigate to WeatherDetailsActivity with the data
+            Intent intent = new Intent(MainActivity.this, WeatherDetailsActivity.class);
+            intent.putExtra("cityLat", cityLat);
+            intent.putExtra("cityLon", cityLon);
+            intent.putExtra("cityName", cityName);
+            intent.putExtra("recommendedDay", bestDay != null ? bestDay.getDate() + " - " + bestDay.getDescription() : "No recommendation available");
+            intent.putParcelableArrayListExtra("summaries", new ArrayList<>(summaries));
+            startActivity(intent);
           } else {
-            // Handle unsuccessful API responses
-            weatherResult.setText("Error: Unable to fetch weather data. " + response.message());
+            Log.e("API Error", "You entered an invalid city! Please try again.");
           }
         }
 
         @Override
         public void onFailure(Call<WeatherResponse> call, Throwable t) {
-          progressBar.setVisibility(View.GONE); // Hide the ProgressBar on failure
-          weatherResult.setText("Network error: " + t.getMessage());
+          progressBar.setVisibility(View.GONE); // Hide progress bar
+          Log.e("API Error", "Failure: " + t.getMessage());
         }
       });
     } else {
-      progressBar.setVisibility(View.GONE); // Ensure ProgressBar is hidden for empty input
-      weatherResult.setText("Please enter a city name.");
+      Log.e("Input Error", "City name cannot be empty");
     }
   }
 
+  // Group forecasts by date
+  private Map<String, List<WeatherItem>> groupForecastsByDay(List<WeatherItem> forecastList) {
+    Map<String, List<WeatherItem>> dailyForecasts = new HashMap<>();
+    for (WeatherItem item : forecastList) {
+      String date = item.getDt_txt().split(" ")[0]; // Extract date
+      dailyForecasts.putIfAbsent(date, new ArrayList<>());
+      dailyForecasts.get(date).add(item);
+    }
+    return dailyForecasts;
+  }
+
+  // Calculate daily summaries
+  private List<DaySummary> calculateDailySummaries(Map<String, List<WeatherItem>> dailyForecasts) {
+    List<DaySummary> summaries = new ArrayList<>();
+    for (Map.Entry<String, List<WeatherItem>> entry : dailyForecasts.entrySet()) {
+      String date = entry.getKey();
+      List<WeatherItem> items = entry.getValue();
+
+      double avgTemp = items.stream()
+              .mapToDouble(item -> item.getMain().getTemp())
+              .average()
+              .orElse(0.0);
+
+      String description = items.get(0).getWeather().get(0).getDescription();
+      summaries.add(new DaySummary(date, avgTemp - 273.15, description)); // Kelvin to Celsius
+    }
+    return summaries;
+  }
+
+  // Get the best day (highest temperature)
+  private DaySummary getBestDay(List<DaySummary> summaries) {
+    return summaries.stream()
+            .max(Comparator.comparingDouble(DaySummary::getAvgTemp))
+            .orElse(null);
+  }
 }

@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId "uk.ac.aston.cs3mdd.whichdayapp"
-        minSdk 24
+        minSdk 21
         targetSdk 34
         versionCode 1
         versionName "1.0"
@@ -39,6 +39,7 @@ dependencies {
     implementation libs.constraintlayout
     implementation libs.navigation.fragment
     implementation libs.navigation.ui
+    implementation libs.activity
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
@@ -54,6 +55,9 @@ dependencies {
 
     implementation 'com.google.android.gms:play-services-maps:17.0.1'
     implementation 'com.google.android.gms:play-services-location:17.0.0'
+
+    implementation 'com.google.android.material:material:1.9.0' // Or the latest version
+
 
     def nav_version = "2.7.1"
 
