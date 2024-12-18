@@ -1,6 +1,9 @@
 plugins {
     alias(libs.plugins.android.application)
     id 'androidx.navigation.safeargs'
+    id 'kotlin-kapt'
+
+
 }
 
 android {
@@ -56,7 +59,13 @@ dependencies {
     implementation 'com.google.android.gms:play-services-maps:17.0.1'
     implementation 'com.google.android.gms:play-services-location:17.0.0'
 
-    implementation 'com.google.android.material:material:1.9.0' // Or the latest version
+    implementation 'com.google.android.material:material:1.9.0'
+
+    //Room database Dependencies
+        implementation "androidx.room:room-runtime:2.5.0"
+        annotationProcessor "androidx.room:room-compiler:2.5.0" // For Java projects
+
+
 
 
     def nav_version = "2.7.1"

@@ -36,6 +36,8 @@ public class MainActivity extends AppCompatActivity {
   private Button buttonFetchWeather;   // Button to fetch weather data
   private ProgressBar progressBar;     // Spinner to indicate loading
 
+
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -48,6 +50,20 @@ public class MainActivity extends AppCompatActivity {
 
     // Set up button click listener
     buttonFetchWeather.setOnClickListener(view -> fetchWeatherData());
+
+    // Find the button by its ID
+    Button buttonFavorites = findViewById(R.id.buttonFavorites);
+
+
+    // Set an OnClickListener for the button
+    buttonFavorites.setOnClickListener(view -> {
+      // Create an intent to navigate to FavoritesActivity
+      Intent intent = new Intent(MainActivity.this, FavoritesActivity.class);
+      startActivity(intent); // Start the FavoritesActivity
+    });
+
+
+
   }
 
   // Fetch weather data from OpenWeatherMap API

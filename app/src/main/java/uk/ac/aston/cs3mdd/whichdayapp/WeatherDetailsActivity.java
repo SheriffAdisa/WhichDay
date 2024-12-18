@@ -2,8 +2,10 @@ package uk.ac.aston.cs3mdd.whichdayapp;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -16,7 +18,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
 
+import uk.ac.aston.cs3mdd.whichdayapp.database.AppDatabase;
 import uk.ac.aston.cs3mdd.whichdayapp.models.DaySummary;
+import uk.ac.aston.cs3mdd.whichdayapp.models.FavoriteCity;
 
 public class WeatherDetailsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -55,6 +59,20 @@ public class WeatherDetailsActivity extends AppCompatActivity implements OnMapRe
 
     // Other setup (e.g., ListView, Recommended Day, etc.)
     setupUI();
+
+    Button buttonAddToFavorites = findViewById(R.id.buttonAddToFavorites);
+    buttonAddToFavorites.setOnClickListener(v -> {
+      String cityName = getIntent().getStringExtra("cityName");
+      if (cityName != null && !cityName.isEmpty()) {
+        AppDatabase db = AppDatabase.getInstance(this);
+        new Thread(() -> {
+          db.favoriteCityDao().insertCity(new FavoriteCity(cityName));
+          runOnUiThread(() -> Toast.makeText(this, "City added to favorites", Toast.LENGTH_SHORT).show());
+        }).start();
+      }
+    });
+
+
   }
 
   // Configure the Google Map when it’s ready
@@ -92,6 +110,7 @@ public class WeatherDetailsActivity extends AppCompatActivity implements OnMapRe
     }
     return super.onOptionsItemSelected(item);
   }
+
 
 
 }
