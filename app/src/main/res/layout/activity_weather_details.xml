@@ -6,6 +6,8 @@
     android:background="@color/white"
     android:padding="16dp">
 
+
+
     <!-- Recommended Day Section -->
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
@@ -68,4 +70,11 @@
             android:dividerHeight="1dp"  />
     </androidx.cardview.widget.CardView>
 
+    <Button
+        android:id="@+id/buttonAddToFavorites"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Save to Favorites"
+        android:layout_marginTop="0dp"
+        android:layout_gravity="center"/>
 </LinearLayout>
