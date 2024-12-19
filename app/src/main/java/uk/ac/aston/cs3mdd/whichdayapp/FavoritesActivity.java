@@ -7,6 +7,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,10 +24,13 @@ public class FavoritesActivity extends AppCompatActivity {
     setTitle("Favourites");
 
 
+    Toolbar toolbar = findViewById(R.id.toolbar);
+    setSupportActionBar(toolbar);
 
-    // Set up the action bar (toolbar) with a back button
+    // Enable the back button
     if (getSupportActionBar() != null) {
-      getSupportActionBar().setDisplayHomeAsUpEnabled(true); // Enable back button
+      getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+      getSupportActionBar().setTitle("Favorites"); // Set the title
     }
 
     ListView listViewFavorites = findViewById(R.id.listViewFavorites);
