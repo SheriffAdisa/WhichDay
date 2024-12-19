@@ -66,6 +66,8 @@ dependencies {
         annotationProcessor "androidx.room:room-compiler:2.5.0" // For Java projects
 
 
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+
 
 
     def nav_version = "2.7.1"

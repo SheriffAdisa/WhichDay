@@ -11,13 +11,14 @@
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
-        android:label="HotDay App"
+        android:label="WhichDay ?"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.WhichDayApp"
+        android:theme="@style/Theme.WhichDayApp.NoActionBar"
         tools:targetApi="31">
         <activity
             android:name=".WeatherDetailsActivity"
+            android:theme="@style/Theme.WhichDayApp.NoActionBar"
             android:exported="false" />
         <!-- Google Maps API key -->
         <meta-data
@@ -26,7 +27,7 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.WhichDayApp">
+            android:theme="@style/Theme.WhichDayApp.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -35,6 +36,7 @@
         </activity>
         <activity android:name=".FavoritesActivity"
             android:label="Favourites"/>
+
     </application>
 
 </manifest>

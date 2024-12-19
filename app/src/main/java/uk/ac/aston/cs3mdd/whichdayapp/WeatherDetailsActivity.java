@@ -1,11 +1,13 @@
 package uk.ac.aston.cs3mdd.whichdayapp;
 import android.os.Bundle;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -14,7 +16,10 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+
 
 import java.util.ArrayList;
 
@@ -36,10 +41,14 @@ public class WeatherDetailsActivity extends AppCompatActivity implements OnMapRe
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_weather_details);
 
+    // Set up the Toolbar
+    Toolbar toolbar = findViewById(R.id.toolbar);
+    setSupportActionBar(toolbar);
+
     // Enable the back button in the action bar
     if (getSupportActionBar() != null) {
       getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-      getSupportActionBar().setTitle("Your Recommendation"); // Set title
+      getSupportActionBar().setTitle("Your Recommendation");
     }
 
     // Get data passed from MainActivity
@@ -54,7 +63,6 @@ public class WeatherDetailsActivity extends AppCompatActivity implements OnMapRe
     if (mapFragment != null) {
       mapFragment.getMapAsync(this);
     }
-
 
 
     // Other setup (e.g., ListView, Recommended Day, etc.)
@@ -102,13 +110,28 @@ public class WeatherDetailsActivity extends AppCompatActivity implements OnMapRe
   }
 
   @Override
-  public boolean onOptionsItemSelected(MenuItem item) {
-    // Check if the home button (up button) was clicked
+  public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+
     if (item.getItemId() == android.R.id.home) {
-      finish(); // Close the current activity and return to the previous one
+      // Navigate back to the previous activity
+      onBackPressed();
       return true;
     }
     return super.onOptionsItemSelected(item);
+  }
+
+
+  private void saveToFavorites() {
+    // Logic to save the recommendation to the database
+    // Example: Show a Toast as a placeholder
+    Toast.makeText(this, "Saved to Favorites!", Toast.LENGTH_SHORT).show();
+  }
+
+
+  @Override
+  public boolean onCreateOptionsMenu(Menu menu) {
+    getMenuInflater().inflate(R.menu.menu_weather_details, menu);
+    return true; // Return true to display the menu
   }
 
 
