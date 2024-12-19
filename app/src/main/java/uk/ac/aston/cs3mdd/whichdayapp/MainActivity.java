@@ -60,18 +60,6 @@ public class MainActivity extends AppCompatActivity {
     // Set up button click listener
     buttonFetchWeather.setOnClickListener(view -> fetchWeatherData());
 
-    // Find the button by its ID
-    Button buttonFavorites = findViewById(R.id.buttonFavorites);
-
-
-    // Set an OnClickListener for the button
-    buttonFavorites.setOnClickListener(view -> {
-      // Create an intent to navigate to FavoritesActivity
-      Intent intent = new Intent(MainActivity.this, FavoritesActivity.class);
-      startActivity(intent); // Start the FavoritesActivity
-    });
-
-
 
   }
 
