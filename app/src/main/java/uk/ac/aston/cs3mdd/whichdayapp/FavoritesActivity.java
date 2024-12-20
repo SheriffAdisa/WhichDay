@@ -9,56 +9,69 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import uk.ac.aston.cs3mdd.whichdayapp.database.AppDatabase;
-import uk.ac.aston.cs3mdd.whichdayapp.models.FavoriteCity;
+import uk.ac.aston.cs3mdd.whichdayapp.database.Bookmark;
 
 public class FavoritesActivity extends AppCompatActivity {
+
+  private ListView listViewFavorites;
+  private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_favorites);
-    setTitle("Favourites");
+    setTitle("Bookmarked Cities");
 
-
+    // Set up the toolbar
     Toolbar toolbar = findViewById(R.id.toolbar);
     setSupportActionBar(toolbar);
 
     // Enable the back button
     if (getSupportActionBar() != null) {
       getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-      getSupportActionBar().setTitle("Favorites"); // Set the title
+      getSupportActionBar().setTitle("Bookmarks");
     }
 
-    ListView listViewFavorites = findViewById(R.id.listViewFavorites);
+    // Initialize the ListView
+    listViewFavorites = findViewById(R.id.listViewFavorites);
 
-    // Load favorites from database
-    AppDatabase db = AppDatabase.getInstance(this);
-    new Thread(() -> {
-      List<FavoriteCity> cities = db.favoriteCityDao().getAllCities();
-      List<String> cityNames = cities.stream().map(FavoriteCity::getCityName).collect(Collectors.toList());
-
-      // Update UI on the main thread
-      runOnUiThread(() -> {
-        if (!cityNames.isEmpty()) {
-          ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, cityNames);
-          listViewFavorites.setAdapter(adapter);
-        } else {
-          Toast.makeText(this, "No favorites saved yet.", Toast.LENGTH_SHORT).show();
-        }
-      });
-    }).start();
+    // Fetch bookmarks from the database
+    loadBookmarks();
   }
 
+  private void loadBookmarks() {
+    executorService.execute(() -> {
+      AppDatabase db = AppDatabase.getInstance(this);
+      List<Bookmark> bookmarks = db.bookmarkDao().getAllBookmarks();
 
-  // Handle the back button press
+      List<String> bookmarkNames = new ArrayList<>();
+      for (Bookmark bookmark : bookmarks) {
+        bookmarkNames.add(bookmark.getName());
+      }
+
+      // Update the UI on the main thread
+      runOnUiThread(() -> {
+        if (bookmarkNames.isEmpty()) {
+          Toast.makeText(this, "No bookmarks found", Toast.LENGTH_SHORT).show();
+        } else {
+          ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, bookmarkNames);
+          listViewFavorites.setAdapter(adapter);
+        }
+      });
+    });
+  }
+
+  // Handle the toolbar's back button
   @Override
   public boolean onOptionsItemSelected(MenuItem item) {
-    if (item.getItemId() == android.R.id.home) { // Back button ID
-      finish(); // Close the current activity and return to the previous one
+    if (item.getItemId() == android.R.id.home) {
+      finish(); // Close the activity
       return true;
     }
     return super.onOptionsItemSelected(item);

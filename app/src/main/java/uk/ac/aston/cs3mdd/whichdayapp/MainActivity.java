@@ -25,6 +25,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import uk.ac.aston.cs3mdd.whichdayapp.database.FavoritesDatabaseHelper;
 import uk.ac.aston.cs3mdd.whichdayapp.models.DaySummary;
 import uk.ac.aston.cs3mdd.whichdayapp.models.WeatherItem;
 import uk.ac.aston.cs3mdd.whichdayapp.models.WeatherResponse;
@@ -36,31 +37,31 @@ public class MainActivity extends AppCompatActivity {
   private static final String API_KEY = "796b2ffe49982b3d99a31e32d87ff3ef";
 
   // UI components
-  private EditText editTextCity;        // User input for city name
-  private Button buttonFetchWeather;   // Button to fetch weather data
-  private ProgressBar progressBar;     // Spinner to indicate loading
+  private EditText editTextCity;       // User input for city name
+  private Button buttonFetchWeather;  // Button to fetch weather data
+  private ProgressBar progressBar;    // Spinner to indicate loading
 
-
+  private FavoritesDatabaseHelper dbHelper; // SQLite database helper for favorites
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
-    // Link the Toolbar
+    // Set up the toolbar
     Toolbar toolbar = findViewById(R.id.toolbar);
     setSupportActionBar(toolbar);
 
-
-    // Linking UI components to XML
+    // Link UI components to XML
     editTextCity = findViewById(R.id.editTextCity);
     buttonFetchWeather = findViewById(R.id.buttonFetchWeather);
     progressBar = findViewById(R.id.progressBar);
 
-    // Set up button click listener
+    // Initialize the database helper
+    dbHelper = new FavoritesDatabaseHelper(this);
+
+    // Set up button click listener for fetching weather data
     buttonFetchWeather.setOnClickListener(view -> fetchWeatherData());
-
-
   }
 
   // Fetch weather data from OpenWeatherMap API
@@ -108,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
             intent.putParcelableArrayListExtra("summaries", new ArrayList<>(summaries));
             startActivity(intent);
           } else {
-            Log.e("API Error", "You entered an invalid city! Please try again.");
+            Log.e("API Error", "Invalid city name. Please try again.");
           }
         }
 
@@ -147,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
               .orElse(0.0);
 
       String description = items.get(0).getWeather().get(0).getDescription();
-      summaries.add(new DaySummary(date, avgTemp - 273.15, description)); // Kelvin to Celsius
+      summaries.add(new DaySummary(date, avgTemp - 273.15, description)); // Convert Kelvin to Celsius
     }
     return summaries;
   }
@@ -158,7 +159,6 @@ public class MainActivity extends AppCompatActivity {
             .max(Comparator.comparingDouble(DaySummary::getAvgTemp))
             .orElse(null);
   }
-
 
   // Inflate the menu
   @Override

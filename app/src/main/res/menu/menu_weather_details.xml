@@ -1,8 +1,8 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/action_save_to_favorites"
+        android:id="@+id/menu_bookmark"
         android:icon="@drawable/ic_addtobookmarks"
-        android:title="Save to Favorites"
+        android:title="Bookmark"
         app:showAsAction="always" />
 </menu>

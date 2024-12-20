@@ -61,9 +61,8 @@ dependencies {
 
     implementation 'com.google.android.material:material:1.9.0'
 
-    //Room database Dependencies
-        implementation "androidx.room:room-runtime:2.5.0"
-        annotationProcessor "androidx.room:room-compiler:2.5.0" // For Java projects
+    implementation "androidx.room:room-runtime:2.5.0"
+    annotationProcessor "androidx.room:room-compiler:2.5.0"
 
 
     implementation 'androidx.appcompat:appcompat:1.6.1'

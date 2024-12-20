@@ -1,13 +1,13 @@
 package uk.ac.aston.cs3mdd.whichdayapp;
+
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -20,21 +20,25 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import uk.ac.aston.cs3mdd.whichdayapp.database.AppDatabase;
+import uk.ac.aston.cs3mdd.whichdayapp.database.Bookmark;
 import uk.ac.aston.cs3mdd.whichdayapp.models.DaySummary;
-import uk.ac.aston.cs3mdd.whichdayapp.models.FavoriteCity;
 
 public class WeatherDetailsActivity extends AppCompatActivity implements OnMapReadyCallback {
-
 
   private GoogleMap mMap; // Google Map instance
   private double cityLat; // Latitude of the city
   private double cityLon; // Longitude of the city
   private String cityName; // City name
 
+  private boolean isBookmarked = false; // Track bookmark state
+  private MenuItem bookmarkMenuItem; // Menu item for bookmark icon
+
+  private final ExecutorService executorService = Executors.newSingleThreadExecutor(); // For background operations
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -45,17 +49,16 @@ public class WeatherDetailsActivity extends AppCompatActivity implements OnMapRe
     Toolbar toolbar = findViewById(R.id.toolbar);
     setSupportActionBar(toolbar);
 
-    // Enable the back button in the action bar
+    // Enable the back button in the toolbar
     if (getSupportActionBar() != null) {
       getSupportActionBar().setDisplayHomeAsUpEnabled(true);
       getSupportActionBar().setTitle("Your Recommendation");
     }
 
-    // Get data passed from MainActivity
+    // Retrieve data passed from MainActivity
     cityLat = getIntent().getDoubleExtra("cityLat", 0.0);
     cityLon = getIntent().getDoubleExtra("cityLon", 0.0);
     cityName = getIntent().getStringExtra("cityName");
-
 
     // Initialize the Map Fragment
     SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -64,26 +67,72 @@ public class WeatherDetailsActivity extends AppCompatActivity implements OnMapRe
       mapFragment.getMapAsync(this);
     }
 
-
-    // Other setup (e.g., ListView, Recommended Day, etc.)
-    setupUI();
-
-    Button buttonAddToFavorites = findViewById(R.id.buttonAddToFavorites);
-    buttonAddToFavorites.setOnClickListener(v -> {
-      String cityName = getIntent().getStringExtra("cityName");
-      if (cityName != null && !cityName.isEmpty()) {
-        AppDatabase db = AppDatabase.getInstance(this);
-        new Thread(() -> {
-          db.favoriteCityDao().insertCity(new FavoriteCity(cityName));
-          runOnUiThread(() -> Toast.makeText(this, "City added to favorites", Toast.LENGTH_SHORT).show());
-        }).start();
-      }
+    // Check if the city is already bookmarked in a background thread
+    executorService.execute(() -> {
+      isBookmarked = AppDatabase.getInstance(this).bookmarkDao().isBookmarked(cityName);
+      runOnUiThread(this::updateBookmarkIcon); // Update the bookmark icon on the UI thread
     });
 
-
+    // Update UI elements
+    setupUI();
   }
 
-  // Configure the Google Map when it’s ready
+  @Override
+  public boolean onCreateOptionsMenu(Menu menu) {
+    getMenuInflater().inflate(R.menu.menu_weather_details, menu);
+    bookmarkMenuItem = menu.findItem(R.id.menu_bookmark); // Reference the bookmark menu item
+    updateBookmarkIcon(); // Set the initial state of the icon
+    return true;
+  }
+
+  @Override
+  public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+    if (item.getItemId() == R.id.menu_bookmark) {
+      toggleBookmark(); // Add or remove the bookmark
+      return true;
+    } else if (item.getItemId() == android.R.id.home) {
+      onBackPressed(); // Handle back button press
+      return true;
+    }
+    return super.onOptionsItemSelected(item);
+  }
+
+  private void updateBookmarkIcon() {
+    if (bookmarkMenuItem != null) {
+      if (isBookmarked) {
+        bookmarkMenuItem.setIcon(R.drawable.ic_addedtobookmarks); // Set "bookmarked" icon
+      } else {
+        bookmarkMenuItem.setIcon(R.drawable.ic_addtobookmarks); // Set "not bookmarked" icon
+      }
+    }
+  }
+
+  private void toggleBookmark() {
+    executorService.execute(() -> {
+      AppDatabase db = AppDatabase.getInstance(this);
+
+      if (isBookmarked) {
+        // Remove from bookmarks
+        db.bookmarkDao().deleteByName(cityName);
+        isBookmarked = false;
+        runOnUiThread(() -> {
+          updateBookmarkIcon();
+          Toast.makeText(this, cityName + " removed from bookmarks", Toast.LENGTH_SHORT).show();
+        });
+      } else {
+        // Add to bookmarks
+        Bookmark bookmark = new Bookmark(cityName);
+        db.bookmarkDao().insert(bookmark);
+        Log.d("Bookmarks", cityName + " added to database");
+        isBookmarked = true;
+        runOnUiThread(() -> {
+          updateBookmarkIcon();
+          Toast.makeText(this, cityName + " added to bookmarks", Toast.LENGTH_SHORT).show();
+        });
+      }
+    });
+  }
+
   @Override
   public void onMapReady(GoogleMap googleMap) {
     mMap = googleMap;
@@ -94,8 +143,8 @@ public class WeatherDetailsActivity extends AppCompatActivity implements OnMapRe
     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(cityLocation, 10));
   }
 
-  // Setup other UI elements (Recommended Day, ListView)
   private void setupUI() {
+    // Display the recommended day and 5-day forecast
     TextView recommendedDayView = findViewById(R.id.recommendedDayView);
     ListView forecastListView = findViewById(R.id.forecastListView);
 
@@ -105,35 +154,9 @@ public class WeatherDetailsActivity extends AppCompatActivity implements OnMapRe
 
     // Display 5-day forecast
     ArrayList<DaySummary> summaries = getIntent().getParcelableArrayListExtra("summaries");
-    ArrayAdapter<DaySummary> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, summaries);
-    forecastListView.setAdapter(adapter);
-  }
-
-  @Override
-  public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-
-    if (item.getItemId() == android.R.id.home) {
-      // Navigate back to the previous activity
-      onBackPressed();
-      return true;
+    if (summaries != null) {
+      ArrayAdapter<DaySummary> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, summaries);
+      forecastListView.setAdapter(adapter);
     }
-    return super.onOptionsItemSelected(item);
   }
-
-
-  private void saveToFavorites() {
-    // Logic to save the recommendation to the database
-    // Example: Show a Toast as a placeholder
-    Toast.makeText(this, "Saved to Favorites!", Toast.LENGTH_SHORT).show();
-  }
-
-
-  @Override
-  public boolean onCreateOptionsMenu(Menu menu) {
-    getMenuInflater().inflate(R.menu.menu_weather_details, menu);
-    return true; // Return true to display the menu
-  }
-
-
-
 }
