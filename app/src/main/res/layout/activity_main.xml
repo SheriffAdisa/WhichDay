@@ -1,67 +1,164 @@
-<LinearLayout
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
-    android:layout_gravity="center"
-    android:padding="16dp"
-    android:background="#ffffff">
+    android:background="@drawable/sky_background"> <!-- Background with sky image -->
 
+    <!-- AppBarLayout with Toolbar -->
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
+            android:background="@color/black"
+            android:textColor="@android:color/white"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            android:elevation="4dp"
-            app:title="WhichDay ? "
-            app:titleTextColor="@android:color/white" />
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
     </com.google.android.material.appbar.AppBarLayout>
 
-
-    <!-- User Input (City Name) -->
-    <com.google.android.material.textfield.TextInputLayout
+    <!-- Main content layout -->
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        app:hintEnabled="true"
-        app:hintAnimationEnabled="true"
+        android:layout_height="match_parent"
+        android:padding="16dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        android:hint="Enter City Name">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/editTextCity"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-    </com.google.android.material.textfield.TextInputLayout>
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:layout_marginTop="190dp">
 
-    <!-- Get Weather Button -->
-    <Button
-        android:id="@+id/buttonFetchWeather"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Get Weather"
-        android:background="@color/buttonBackground"
-        android:textColor="@color/buttonTextColor"
-        android:layout_gravity="center" />
+            <!-- City Search Section -->
+            <TextView
+                android:id="@+id/enter_city_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="Enter your city:"
+                android:textColor="@android:color/white"
+                android:shadowColor="#000000"
+                android:shadowDx="1.5"
+                android:shadowDy="1.3"
+                android:shadowRadius="1.6"
+                android:textSize="32sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/search_box_background"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="8dp">
+
+                <EditText
+                    android:id="@+id/editTextCity"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:hint="*Enter City*"
+                    android:padding="4dp"
+                    android:textAlignment="center"
+                    android:textSize="18sp" />
+
+                <ImageView
+                    android:id="@+id/search_icon"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:contentDescription="Search Icon"
+                    android:src="@drawable/ic_search" />
+
+
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/buttonFetchWeather"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="-5dp"
+                android:layout_marginBottom="50dp"
+                android:background="@color/black"
+                android:textColor="@color/white"
+                android:text="Search Best Day"
+                android:padding = "10dp"/>
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone" />
 
 
 
-    <!-- ProgressBar (Loading Indicator) -->
-    <ProgressBar
-        android:id="@+id/progressBar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:layout_gravity="center"
-        android:layout_marginTop="16dp"
-        android:contentDescription="Loading weather information" />
+            <LinearLayout
+                android:id="@+id/recentSearchesContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@color/black"
+                android:orientation="vertical"
+                android:padding="8dp">
+
+                <!-- Recently Searched Section -->
+                <TextView
+                    android:id="@+id/recently_searched_label"
+                    android:layout_width="match_parent"
+                    android:textAlignment="center"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:text="Recently Searched:"
+                    android:textColor="@android:color/white"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
 
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
 
-</LinearLayout>
+                    <!-- Dynamic Buttons for Recently Searched -->
+                    <Button
+                        android:id="@+id/recent_search_1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:background="@drawable/button_background"
+                        android:text="London"
+                        android:textColor="@android:color/white" />
+
+                    <Button
+                        android:id="@+id/recent_search_2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:background="@drawable/button_background"
+                        android:text="Birmingham"
+                        android:textColor="@android:color/white" />
+
+                    <Button
+                        android:id="@+id/recent_search_3"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:background="@drawable/button_background"
+                        android:text="Bristol"
+                        android:textColor="@android:color/white" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

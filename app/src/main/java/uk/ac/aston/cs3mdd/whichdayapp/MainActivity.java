@@ -1,6 +1,7 @@
 package uk.ac.aston.cs3mdd.whichdayapp;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -8,17 +9,22 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -40,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
   private EditText editTextCity;       // User input for city name
   private Button buttonFetchWeather;  // Button to fetch weather data
   private ProgressBar progressBar;    // Spinner to indicate loading
+  private LinearLayout recentSearchesContainer; // Container for recent searches
 
   private FavoritesDatabaseHelper dbHelper; // SQLite database helper for favorites
 
@@ -56,12 +63,26 @@ public class MainActivity extends AppCompatActivity {
     editTextCity = findViewById(R.id.editTextCity);
     buttonFetchWeather = findViewById(R.id.buttonFetchWeather);
     progressBar = findViewById(R.id.progressBar);
+    recentSearchesContainer = findViewById(R.id.recentSearchesContainer);
+
+    // Log errors if critical views are null
+    if (progressBar == null) {
+      Log.e("MainActivity", "ProgressBar is null. Ensure it exists in the layout.");
+    }
+    if (recentSearchesContainer == null) {
+      Log.e("MainActivity", "recentSearchesContainer is null. Check your layout file.");
+    }
 
     // Initialize the database helper
     dbHelper = new FavoritesDatabaseHelper(this);
 
     // Set up button click listener for fetching weather data
     buttonFetchWeather.setOnClickListener(view -> fetchWeatherData());
+
+    // Update the UI for recent searches
+    if (recentSearchesContainer != null) {
+      updateRecentSearchesUI();
+    }
   }
 
   // Fetch weather data from OpenWeatherMap API
@@ -69,7 +90,9 @@ public class MainActivity extends AppCompatActivity {
     String cityName = editTextCity.getText().toString().trim();
 
     if (!cityName.isEmpty()) {
-      progressBar.setVisibility(View.VISIBLE); // Show progress bar during API call
+      if (progressBar != null) {
+        progressBar.setVisibility(View.VISIBLE); // Show progress bar during API call
+      }
 
       // Set up Retrofit for the API call
       Retrofit retrofit = new Retrofit.Builder()
@@ -83,7 +106,9 @@ public class MainActivity extends AppCompatActivity {
       call.enqueue(new Callback<WeatherResponse>() {
         @Override
         public void onResponse(Call<WeatherResponse> call, Response<WeatherResponse> response) {
-          progressBar.setVisibility(View.GONE); // Hide progress bar
+          if (progressBar != null) {
+            progressBar.setVisibility(View.GONE); // Hide progress bar
+          }
 
           if (response.isSuccessful() && response.body() != null) {
             WeatherResponse weatherResponse = response.body();
@@ -111,11 +136,14 @@ public class MainActivity extends AppCompatActivity {
           } else {
             Log.e("API Error", "Invalid city name. Please try again.");
           }
+          saveToRecentSearches(cityName);
         }
 
         @Override
         public void onFailure(Call<WeatherResponse> call, Throwable t) {
-          progressBar.setVisibility(View.GONE); // Hide progress bar
+          if (progressBar != null) {
+            progressBar.setVisibility(View.GONE); // Hide progress bar
+          }
           Log.e("API Error", "Failure: " + t.getMessage());
         }
       });
@@ -177,5 +205,61 @@ public class MainActivity extends AppCompatActivity {
       return true;
     }
     return super.onOptionsItemSelected(item);
+  }
+
+  private void saveToRecentSearches(String cityName) {
+    SharedPreferences prefs = getSharedPreferences("RecentSearchesPrefs", MODE_PRIVATE);
+    SharedPreferences.Editor editor = prefs.edit();
+
+    // Get existing searches
+    Set<String> recentSearches = prefs.getStringSet("recentSearches", new LinkedHashSet<>());
+
+    // Ensure the city is unique and at the top
+    if (recentSearches.contains(cityName)) {
+      recentSearches.remove(cityName); // Remove duplicate
+    }
+    recentSearches.add(cityName); // Add new search to the set
+
+    // Save back to SharedPreferences
+    editor.putStringSet("recentSearches", recentSearches);
+    editor.apply();
+
+    // Update the UI
+    updateRecentSearchesUI();
+  }
+
+  private List<String> getRecentSearches() {
+    SharedPreferences prefs = getSharedPreferences("RecentSearchesPrefs", MODE_PRIVATE);
+    Set<String> recentSearches = prefs.getStringSet("recentSearches", new LinkedHashSet<>());
+
+    // Convert Set to List and reverse to show latest first
+    List<String> recentList = new ArrayList<>(recentSearches);
+    Collections.reverse(recentList);
+    return recentList;
+  }
+
+  private void updateRecentSearchesUI() {
+    if (recentSearchesContainer == null) {
+      Log.e("MainActivity", "recentSearchesContainer is null. Skipping update.");
+      return;
+    }
+
+    List<String> recentSearches = getRecentSearches();
+
+    recentSearchesContainer.removeAllViews(); // Clear existing views
+
+    for (String city : recentSearches) {
+      // Dynamically create TextViews for each recent search
+      TextView textView = new TextView(this);
+      textView.setText(city);
+      textView.setTextSize(18);
+      textView.setPadding(10, 10, 10, 10);
+      textView.setOnClickListener(v -> {
+        editTextCity.setText(city);
+        fetchWeatherData();
+      });
+
+      recentSearchesContainer.addView(textView); // Add to container
+    }
   }
 }
