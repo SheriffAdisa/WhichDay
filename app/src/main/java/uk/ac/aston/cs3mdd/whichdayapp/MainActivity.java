@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -244,22 +245,44 @@ public class MainActivity extends AppCompatActivity {
       return;
     }
 
+    // Get the list of recent searches
     List<String> recentSearches = getRecentSearches();
 
-    recentSearchesContainer.removeAllViews(); // Clear existing views
+    // Clear only the dynamically added views (not the "Recently Searched" label)
+    int childCount = recentSearchesContainer.getChildCount();
+    if (childCount > 1) { // Keep the first child (the "Recently Searched" label)
+      recentSearchesContainer.removeViews(1, childCount - 1);
+    }
 
     for (String city : recentSearches) {
       // Dynamically create TextViews for each recent search
       TextView textView = new TextView(this);
       textView.setText(city);
       textView.setTextSize(18);
-      textView.setPadding(10, 10, 10, 10);
+      textView.setPadding(20, 20, 20, 20);
+      textView.setTextColor(getResources().getColor(android.R.color.white)); // Text color
+      textView.setBackgroundResource(R.drawable.city_item_background); // Set rounded background
+      textView.setGravity(Gravity.CENTER); // Center text
       textView.setOnClickListener(v -> {
         editTextCity.setText(city);
         fetchWeatherData();
       });
 
-      recentSearchesContainer.addView(textView); // Add to container
+      // Add a margin around each city item
+      LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+              LinearLayout.LayoutParams.MATCH_PARENT,
+              LinearLayout.LayoutParams.WRAP_CONTENT
+      );
+      params.setMargins(0, 8, 0, 8); // Top and bottom margin
+      textView.setLayoutParams(params);
+
+      // Add the TextView to the container
+      recentSearchesContainer.addView(textView);
     }
   }
+
+
+
+
+
 }

@@ -6,6 +6,13 @@
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
 
+    <color name="gradient_start">#87CEEB</color> <!-- Light blue -->
+    <color name="gradient_end">#1E90FF</color> <!-- Darker blue -->
+    <color name="button_color">#4CAF50</color> <!-- Greenish button -->
+    <color name="blueish_white">#F8F9FA</color> <!-- Softer white -->
+    <color name="dark_text">#212121</color> <!-- For labels and dynamic text -->
+
+
     <color name="buttonBackground">#3F51B5</color>
     <color name="buttonTextColor">#FFFFFF</color>
 </resources>
