@@ -1,15 +1,18 @@
 package uk.ac.aston.cs3mdd.whichdayapp;
 
 import android.os.Bundle;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executors;
 
@@ -40,45 +43,84 @@ public class FavoritesActivity extends AppCompatActivity {
     bookmarksRecyclerView = findViewById(R.id.bookmarksRecyclerView);
     bookmarksRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-    bookmarkAdapter = new BookmarkAdapter(new ArrayList<>(), this);
+    // Initialize adapter with an empty list
+    bookmarks = new ArrayList<>();
+    bookmarkAdapter = new BookmarkAdapter(bookmarks, this);
     bookmarksRecyclerView.setAdapter(bookmarkAdapter);
 
     // Load bookmarks
     loadBookmarks();
   }
 
+  @Override
+  public boolean onCreateOptionsMenu(Menu menu) {
+    getMenuInflater().inflate(R.menu.menu_favorites, menu); // Ensure menu_favorites.xml exists
+    return true;
+  }
+
+  @Override
+  public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+    int itemId = item.getItemId();
+
+    if (itemId == R.id.sort_alphabetically) {
+      sortBookmarksAlphabetically();
+      return true;
+    } else if (itemId == R.id.sort_by_date) {
+      sortBookmarksByDate();
+      return true;
+    } else if (itemId == android.R.id.home) {
+      finish(); // Handle back button
+      return true;
+    } else {
+      return super.onOptionsItemSelected(item);
+    }
+  }
+
+  /**
+   * Sorts bookmarks alphabetically by city name.
+   */
+  private void sortBookmarksAlphabetically() {
+    Collections.sort(bookmarks, (b1, b2) -> b1.getCityName().compareToIgnoreCase(b2.getCityName()));
+    bookmarkAdapter.notifyDataSetChanged();
+  }
+
+  /**
+   * Sorts bookmarks by creation date (descending order).
+   */
+  private void sortBookmarksByDate() {
+    Collections.sort(bookmarks, (b1, b2) -> Long.compare(b2.getId(), b1.getId())); // Descending by ID
+    bookmarkAdapter.notifyDataSetChanged();
+  }
 
   /**
    * Loads the list of bookmarks from the database and sets up the RecyclerView.
    */
   private void loadBookmarks() {
     Executors.newSingleThreadExecutor().execute(() -> {
-      AppDatabase db = AppDatabase.getInstance(this);
-      List<Bookmark> bookmarks = db.bookmarkDao().getAllBookmarks();
+      try {
+        AppDatabase db = AppDatabase.getInstance(this);
+        List<Bookmark> fetchedBookmarks = db.bookmarkDao().getAllBookmarks();
 
-      // Update the UI on the main thread
-      runOnUiThread(() -> {
-        if (bookmarks.isEmpty()) {
-          Toast.makeText(this, "No bookmarks found", Toast.LENGTH_SHORT).show();
-        } else {
-          bookmarkAdapter = new BookmarkAdapter(bookmarks, this);
-          bookmarksRecyclerView.setAdapter(bookmarkAdapter);
-        }
-      });
+        // Update the UI on the main thread
+        runOnUiThread(() -> {
+          bookmarks.clear(); // Clear the current list
+          bookmarks.addAll(fetchedBookmarks); // Add new items
+          bookmarkAdapter.notifyDataSetChanged(); // Notify adapter about data change
+
+          if (fetchedBookmarks.isEmpty()) {
+            Toast.makeText(this, "No bookmarks found", Toast.LENGTH_SHORT).show();
+          }
+        });
+      } catch (Exception e) {
+        runOnUiThread(() -> Toast.makeText(this, "Failed to load bookmarks.", Toast.LENGTH_SHORT).show());
+        e.printStackTrace(); // Log the error for debugging
+      }
     });
   }
 
-
-
-  /**
-   * Handles the toolbar's back button action.
-   */
   @Override
-  public boolean onOptionsItemSelected(MenuItem item) {
-    if (item.getItemId() == android.R.id.home) {
-      finish(); // Close the activity when the back button is pressed
-      return true;
-    }
-    return super.onOptionsItemSelected(item);
+  protected void onResume() {
+    super.onResume();
+    loadBookmarks(); // Refresh data when returning to the activity
   }
 }

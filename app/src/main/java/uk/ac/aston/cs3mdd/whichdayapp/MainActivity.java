@@ -13,6 +13,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,6 +33,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+
 import uk.ac.aston.cs3mdd.whichdayapp.database.FavoritesDatabaseHelper;
 import uk.ac.aston.cs3mdd.whichdayapp.models.DaySummary;
 import uk.ac.aston.cs3mdd.whichdayapp.models.WeatherItem;
@@ -80,6 +82,13 @@ public class MainActivity extends AppCompatActivity {
     // Set up button click listener for fetching weather data
     buttonFetchWeather.setOnClickListener(view -> fetchWeatherData());
 
+    // Check if launched from a bookmark
+    String bookmarkedCity = getIntent().getStringExtra("cityName");
+    if (bookmarkedCity != null) {
+      editTextCity.setText(bookmarkedCity);
+      fetchWeatherData();
+    }
+
     // Update the UI for recent searches
     if (recentSearchesContainer != null) {
       updateRecentSearchesUI();
@@ -90,67 +99,68 @@ public class MainActivity extends AppCompatActivity {
   private void fetchWeatherData() {
     String cityName = editTextCity.getText().toString().trim();
 
-    if (!cityName.isEmpty()) {
-      if (progressBar != null) {
-        progressBar.setVisibility(View.VISIBLE); // Show progress bar during API call
+    if (cityName.isEmpty()) {
+      Toast.makeText(this, "City name cannot be empty.", Toast.LENGTH_SHORT).show();
+      return;
+    }
+
+    if (progressBar != null) {
+      progressBar.setVisibility(View.VISIBLE); // Show progress bar during API call
+    }
+
+    // Set up Retrofit for the API call
+    Retrofit retrofit = new Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build();
+
+    WeatherApi weatherApi = retrofit.create(WeatherApi.class);
+    Call<WeatherResponse> call = weatherApi.getWeatherByCityName(cityName, API_KEY);
+
+    call.enqueue(new Callback<WeatherResponse>() {
+      @Override
+      public void onResponse(Call<WeatherResponse> call, Response<WeatherResponse> response) {
+        if (progressBar != null) {
+          progressBar.setVisibility(View.GONE); // Hide progress bar
+        }
+
+        if (response.isSuccessful() && response.body() != null) {
+          WeatherResponse weatherResponse = response.body();
+
+          // Extract necessary data
+          double cityLat = weatherResponse.getCity().getCoord().getLat();
+          double cityLon = weatherResponse.getCity().getCoord().getLon();
+          String cityName = weatherResponse.getCity().getName();
+
+          // Process weather data
+          Map<String, List<WeatherItem>> dailyForecasts = groupForecastsByDay(weatherResponse.getList());
+          List<DaySummary> summaries = calculateDailySummaries(dailyForecasts);
+
+          // Find the recommended day
+          DaySummary bestDay = getBestDay(summaries);
+
+          // Navigate to WeatherDetailsActivity with the data
+          Intent intent = new Intent(MainActivity.this, WeatherDetailsActivity.class);
+          intent.putExtra("cityLat", cityLat);
+          intent.putExtra("cityLon", cityLon);
+          intent.putExtra("cityName", cityName);
+          intent.putExtra("recommendedDay", bestDay != null ? bestDay.getDate() + " - " + bestDay.getDescription() : "No recommendation available");
+          intent.putParcelableArrayListExtra("summaries", new ArrayList<>(summaries));
+          startActivity(intent);
+        } else {
+          Toast.makeText(MainActivity.this, "Invalid city name. Please try again.", Toast.LENGTH_SHORT).show();
+        }
+        saveToRecentSearches(cityName);
       }
 
-      // Set up Retrofit for the API call
-      Retrofit retrofit = new Retrofit.Builder()
-              .baseUrl(BASE_URL)
-              .addConverterFactory(GsonConverterFactory.create())
-              .build();
-
-      WeatherApi weatherApi = retrofit.create(WeatherApi.class);
-      Call<WeatherResponse> call = weatherApi.getWeatherByCityName(cityName, API_KEY);
-
-      call.enqueue(new Callback<WeatherResponse>() {
-        @Override
-        public void onResponse(Call<WeatherResponse> call, Response<WeatherResponse> response) {
-          if (progressBar != null) {
-            progressBar.setVisibility(View.GONE); // Hide progress bar
-          }
-
-          if (response.isSuccessful() && response.body() != null) {
-            WeatherResponse weatherResponse = response.body();
-
-            // Extract necessary data
-            double cityLat = weatherResponse.getCity().getCoord().getLat();
-            double cityLon = weatherResponse.getCity().getCoord().getLon();
-            String cityName = weatherResponse.getCity().getName();
-
-            // Process weather data
-            Map<String, List<WeatherItem>> dailyForecasts = groupForecastsByDay(weatherResponse.getList());
-            List<DaySummary> summaries = calculateDailySummaries(dailyForecasts);
-
-            // Find the recommended day
-            DaySummary bestDay = getBestDay(summaries);
-
-            // Navigate to WeatherDetailsActivity with the data
-            Intent intent = new Intent(MainActivity.this, WeatherDetailsActivity.class);
-            intent.putExtra("cityLat", cityLat);
-            intent.putExtra("cityLon", cityLon);
-            intent.putExtra("cityName", cityName);
-            intent.putExtra("recommendedDay", bestDay != null ? bestDay.getDate() + " - " + bestDay.getDescription() : "No recommendation available");
-            intent.putParcelableArrayListExtra("summaries", new ArrayList<>(summaries));
-            startActivity(intent);
-          } else {
-            Log.e("API Error", "Invalid city name. Please try again.");
-          }
-          saveToRecentSearches(cityName);
+      @Override
+      public void onFailure(Call<WeatherResponse> call, Throwable t) {
+        if (progressBar != null) {
+          progressBar.setVisibility(View.GONE); // Hide progress bar
         }
-
-        @Override
-        public void onFailure(Call<WeatherResponse> call, Throwable t) {
-          if (progressBar != null) {
-            progressBar.setVisibility(View.GONE); // Hide progress bar
-          }
-          Log.e("API Error", "Failure: " + t.getMessage());
-        }
-      });
-    } else {
-      Log.e("Input Error", "City name cannot be empty");
-    }
+        Toast.makeText(MainActivity.this, "API request failed: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+      }
+    });
   }
 
   // Group forecasts by date
@@ -280,9 +290,4 @@ public class MainActivity extends AppCompatActivity {
       recentSearchesContainer.addView(textView);
     }
   }
-
-
-
-
-
 }

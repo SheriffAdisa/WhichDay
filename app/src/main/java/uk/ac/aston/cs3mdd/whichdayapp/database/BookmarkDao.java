@@ -14,7 +14,7 @@ public interface BookmarkDao {
   @Insert(onConflict = OnConflictStrategy.REPLACE)
   void insert(Bookmark bookmark);
 
-  @Query("SELECT * FROM bookmarks")
+  @Query("SELECT * FROM bookmarks ORDER BY id DESC")
   List<Bookmark> getAllBookmarks();
 
   @Query("DELETE FROM bookmarks WHERE cityName = :name")
