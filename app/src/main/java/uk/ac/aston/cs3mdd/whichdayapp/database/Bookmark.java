@@ -1,31 +1,37 @@
 package uk.ac.aston.cs3mdd.whichdayapp.database;
 
-import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-/**
- * Represents a bookmark in the database.
- */
-@Entity(tableName = "bookmarks") // Marks this class as a database entity (table)
+@Entity(tableName = "bookmarks")
 public class Bookmark {
-
-  @PrimaryKey
-  @NonNull
-  private String name; // The city name (used as a unique key)
+  @PrimaryKey(autoGenerate = true)
+  private int id;
+  private String cityName; // Ensure this field exists
 
   // Constructor
-  public Bookmark(@NonNull String name) {
-    this.name = name;
+  public Bookmark(String cityName) {
+    this.cityName = cityName;
   }
 
-  // Getter for the name
-  public String getName() {
-    return name;
+  // Getter for cityName
+  public String getCityName() {
+    return cityName;
   }
 
-  // Setter for the name
-  public void setName(@NonNull String name) {
-    this.name = name;
+  // Setter for cityName (optional)
+  public void setCityName(String cityName) {
+    this.cityName = cityName;
   }
+
+  // Getter for ID (Room requires this)
+  public int getId() {
+    return id;
+  }
+
+  // Setter for ID (optional, Room handles this automatically)
+  public void setId(int id) {
+    this.id = id;
+  }
+
 }

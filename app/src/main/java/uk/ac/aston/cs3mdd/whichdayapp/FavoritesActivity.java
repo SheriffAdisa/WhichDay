@@ -2,76 +2,81 @@ package uk.ac.aston.cs3mdd.whichdayapp;
 
 import android.os.Bundle;
 import android.view.MenuItem;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import uk.ac.aston.cs3mdd.whichdayapp.adapters.BookmarkAdapter;
 import uk.ac.aston.cs3mdd.whichdayapp.database.AppDatabase;
 import uk.ac.aston.cs3mdd.whichdayapp.database.Bookmark;
 
 public class FavoritesActivity extends AppCompatActivity {
 
-  private ListView listViewFavorites;
-  private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+  private RecyclerView bookmarksRecyclerView; // RecyclerView for bookmarks
+  private BookmarkAdapter bookmarkAdapter;    // Adapter for RecyclerView
+  private List<Bookmark> bookmarks;           // List of bookmarks from the database
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_favorites);
-    setTitle("Bookmarked Cities");
 
-    // Set up the toolbar
+    // Toolbar setup
     Toolbar toolbar = findViewById(R.id.toolbar);
     setSupportActionBar(toolbar);
-
-    // Enable the back button
     if (getSupportActionBar() != null) {
       getSupportActionBar().setDisplayHomeAsUpEnabled(true);
       getSupportActionBar().setTitle("Bookmarks");
     }
 
-    // Initialize the ListView
-    listViewFavorites = findViewById(R.id.listViewFavorites);
+    // RecyclerView setup
+    bookmarksRecyclerView = findViewById(R.id.bookmarksRecyclerView);
+    bookmarksRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-    // Fetch bookmarks from the database
+    bookmarkAdapter = new BookmarkAdapter(new ArrayList<>(), this);
+    bookmarksRecyclerView.setAdapter(bookmarkAdapter);
+
+    // Load bookmarks
     loadBookmarks();
   }
 
+
+  /**
+   * Loads the list of bookmarks from the database and sets up the RecyclerView.
+   */
   private void loadBookmarks() {
-    executorService.execute(() -> {
+    Executors.newSingleThreadExecutor().execute(() -> {
       AppDatabase db = AppDatabase.getInstance(this);
       List<Bookmark> bookmarks = db.bookmarkDao().getAllBookmarks();
 
-      List<String> bookmarkNames = new ArrayList<>();
-      for (Bookmark bookmark : bookmarks) {
-        bookmarkNames.add(bookmark.getName());
-      }
-
       // Update the UI on the main thread
       runOnUiThread(() -> {
-        if (bookmarkNames.isEmpty()) {
+        if (bookmarks.isEmpty()) {
           Toast.makeText(this, "No bookmarks found", Toast.LENGTH_SHORT).show();
         } else {
-          ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, bookmarkNames);
-          listViewFavorites.setAdapter(adapter);
+          bookmarkAdapter = new BookmarkAdapter(bookmarks, this);
+          bookmarksRecyclerView.setAdapter(bookmarkAdapter);
         }
       });
     });
   }
 
-  // Handle the toolbar's back button
+
+
+  /**
+   * Handles the toolbar's back button action.
+   */
   @Override
   public boolean onOptionsItemSelected(MenuItem item) {
     if (item.getItemId() == android.R.id.home) {
-      finish(); // Close the activity
+      finish(); // Close the activity when the back button is pressed
       return true;
     }
     return super.onOptionsItemSelected(item);

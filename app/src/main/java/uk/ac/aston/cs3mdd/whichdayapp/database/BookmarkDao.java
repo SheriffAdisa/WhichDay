@@ -17,9 +17,9 @@ public interface BookmarkDao {
   @Query("SELECT * FROM bookmarks")
   List<Bookmark> getAllBookmarks();
 
-  @Query("DELETE FROM bookmarks WHERE name = :name")
+  @Query("DELETE FROM bookmarks WHERE cityName = :name")
   void deleteByName(String name);
 
-  @Query("SELECT EXISTS(SELECT 1 FROM bookmarks WHERE name = :name)")
+  @Query("SELECT EXISTS(SELECT 1 FROM bookmarks WHERE cityName = :name)")
   boolean isBookmarked(String name);
 }
