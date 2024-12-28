@@ -214,7 +214,11 @@ public class MainActivity extends AppCompatActivity {
       Intent intent = new Intent(MainActivity.this, FavoritesActivity.class);
       startActivity(intent);
       return true;
-    }
+    } else if (item.getItemId() == R.id.menu_view_map) {
+    Intent intent = new Intent(MainActivity.this, MapActivity.class);
+    startActivity(intent);
+    return true;
+  }
     return super.onOptionsItemSelected(item);
   }
 

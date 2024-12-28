@@ -1,61 +1,81 @@
 package uk.ac.aston.cs3mdd.whichdayapp.database;
 
-import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 
-public class FavoritesDatabaseHelper extends SQLiteOpenHelper {
+import java.util.List;
+import java.util.concurrent.Executors;
 
-  private static final String DATABASE_NAME = "favorites.db";
-  private static final int DATABASE_VERSION = 1;
+public class FavoritesDatabaseHelper {
 
-  private static final String TABLE_NAME = "bookmarks";
-  private static final String COLUMN_NAME = "name";
+  private final AppDatabase database;
 
   public FavoritesDatabaseHelper(Context context) {
-    super(context, DATABASE_NAME, null, DATABASE_VERSION);
+    this.database = AppDatabase.getInstance(context);
   }
 
-  @Override
-  public void onCreate(SQLiteDatabase db) {
-    String createTable = "CREATE TABLE " + TABLE_NAME + " (" +
-            COLUMN_NAME + " TEXT PRIMARY KEY)";
-    db.execSQL(createTable);
-  }
-
-  @Override
-  public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-    db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
-    onCreate(db);
-  }
-
+  /**
+   * Adds a bookmark to the Room database.
+   *
+   * @param name the name of the city to bookmark.
+   * @return true if the bookmark was added successfully, false otherwise.
+   */
   public boolean addBookmark(String name) {
-    SQLiteDatabase db = this.getWritableDatabase();
-    ContentValues values = new ContentValues();
-    values.put(COLUMN_NAME, name);
-
-    long result = db.insert(TABLE_NAME, null, values);
-    return result != -1; // Return true if insertion was successful
+    try {
+      Executors.newSingleThreadExecutor().execute(() -> {
+        Bookmark bookmark = new Bookmark(name, 0.0, 0.0); // Default latitude and longitude
+        database.bookmarkDao().insert(bookmark);
+      });
+      return true;
+    } catch (Exception e) {
+      e.printStackTrace();
+      return false;
+    }
   }
 
+  /**
+   * Removes a bookmark from the Room database.
+   *
+   * @param name the name of the city to remove from bookmarks.
+   * @return true if the bookmark was removed successfully, false otherwise.
+   */
   public boolean removeBookmark(String name) {
-    SQLiteDatabase db = this.getWritableDatabase();
-    int result = db.delete(TABLE_NAME, COLUMN_NAME + " = ?", new String[]{name});
-    return result > 0; // Return true if deletion was successful
+    try {
+      Executors.newSingleThreadExecutor().execute(() -> {
+        database.bookmarkDao().deleteByName(name);
+      });
+      return true;
+    } catch (Exception e) {
+      e.printStackTrace();
+      return false;
+    }
   }
 
+  /**
+   * Checks if a bookmark exists in the Room database.
+   *
+   * @param name the name of the city to check.
+   * @return true if the bookmark exists, false otherwise.
+   */
   public boolean isBookmarked(String name) {
-    SQLiteDatabase db = this.getReadableDatabase();
-    Cursor cursor = db.query(TABLE_NAME, null, COLUMN_NAME + " = ?", new String[]{name}, null, null, null);
-    boolean exists = cursor.getCount() > 0;
-    cursor.close();
-    return exists;
+    try {
+      return database.bookmarkDao().isBookmarked(name);
+    } catch (Exception e) {
+      e.printStackTrace();
+      return false;
+    }
   }
 
-  public Cursor getAllBookmarks() {
-    SQLiteDatabase db = this.getReadableDatabase();
-    return db.query(TABLE_NAME, null, null, null, null, null, null);
+  /**
+   * Retrieves all bookmarks from the Room database.
+   *
+   * @return a list of all bookmarks.
+   */
+  public List<Bookmark> getAllBookmarks() {
+    try {
+      return database.bookmarkDao().getAllBookmarks();
+    } catch (Exception e) {
+      e.printStackTrace();
+      return null;
+    }
   }
 }

@@ -1,37 +1,41 @@
 package uk.ac.aston.cs3mdd.whichdayapp.database;
 
+import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 @Entity(tableName = "bookmarks")
 public class Bookmark {
+
   @PrimaryKey(autoGenerate = true)
   private int id;
-  private String cityName; // Ensure this field exists
+
+  @ColumnInfo(name = "cityName")
+  private String cityName;
+
+  @ColumnInfo(name = "latitude")
+  private double latitude;
+
+  @ColumnInfo(name = "longitude")
+  private double longitude;
 
   // Constructor
-  public Bookmark(String cityName) {
+  public Bookmark(String cityName, double latitude, double longitude) {
     this.cityName = cityName;
+    this.latitude = latitude;
+    this.longitude = longitude;
   }
 
-  // Getter for cityName
-  public String getCityName() {
-    return cityName;
-  }
+  // Getters and setters
+  public int getId() { return id; }
+  public void setId(int id) { this.id = id; }
 
-  // Setter for cityName (optional)
-  public void setCityName(String cityName) {
-    this.cityName = cityName;
-  }
+  public String getCityName() { return cityName; }
+  public void setCityName(String cityName) { this.cityName = cityName; }
 
-  // Getter for ID (Room requires this)
-  public int getId() {
-    return id;
-  }
+  public double getLatitude() { return latitude; }
+  public void setLatitude(double latitude) { this.latitude = latitude; }
 
-  // Setter for ID (optional, Room handles this automatically)
-  public void setId(int id) {
-    this.id = id;
-  }
-
+  public double getLongitude() { return longitude; }
+  public void setLongitude(double longitude) { this.longitude = longitude; }
 }

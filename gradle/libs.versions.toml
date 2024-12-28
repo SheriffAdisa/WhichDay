@@ -11,6 +11,7 @@ navigationFragment = "2.8.3"
 navigationUi = "2.8.3"
 okhttp = "4.9.0"
 activity = "1.9.3"
+junitJunit = "4.12"
 
 [libraries]
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
@@ -25,6 +26,7 @@ navigation-ui = { group = "androidx.navigation", name = "navigation-ui", version
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "converterGson" }
 activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
+junit-junit = { group = "junit", name = "junit", version.ref = "junitJunit" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

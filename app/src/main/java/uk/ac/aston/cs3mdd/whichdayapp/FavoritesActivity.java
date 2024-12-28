@@ -1,5 +1,6 @@
 package uk.ac.aston.cs3mdd.whichdayapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -54,7 +55,7 @@ public class FavoritesActivity extends AppCompatActivity {
 
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
-    getMenuInflater().inflate(R.menu.menu_favorites, menu); // Ensure menu_favorites.xml exists
+    getMenuInflater().inflate(R.menu.menu_favorites, menu); // Ensure menu_favorites exists
     return true;
   }
 
@@ -62,19 +63,21 @@ public class FavoritesActivity extends AppCompatActivity {
   public boolean onOptionsItemSelected(@NonNull MenuItem item) {
     int itemId = item.getItemId();
 
-    if (itemId == R.id.sort_alphabetically) {
+    if (itemId == R.id.view_map) {
+      Intent intent = new Intent(this, MapActivity.class);
+      startActivity(intent);
+      return true;
+    } else if (itemId == R.id.sort_alphabetically) {
       sortBookmarksAlphabetically();
       return true;
     } else if (itemId == R.id.sort_by_date) {
       sortBookmarksByDate();
       return true;
-    } else if (itemId == android.R.id.home) {
-      finish(); // Handle back button
-      return true;
     } else {
       return super.onOptionsItemSelected(item);
     }
   }
+
 
   /**
    * Sorts bookmarks alphabetically by city name.

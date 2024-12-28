@@ -121,7 +121,11 @@ public class WeatherDetailsActivity extends AppCompatActivity implements OnMapRe
         });
       } else {
         // Add to bookmarks
-        Bookmark bookmark = new Bookmark(cityName);
+        double latitude = getIntent().getDoubleExtra("latitude", 0.0);
+        double longitude = getIntent().getDoubleExtra("longitude", 0.0);
+
+        Bookmark bookmark = new Bookmark(cityName, latitude, longitude);
+
         db.bookmarkDao().insert(bookmark);
         Log.d("Bookmarks", cityName + " added to database");
         isBookmarked = true;

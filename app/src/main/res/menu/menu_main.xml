@@ -5,4 +5,11 @@
         android:title="Bookmarks"
         android:icon="@drawable/ic_showbookmarks"
         app:showAsAction="always" />
+
+    <item
+        android:id="@+id/menu_view_map"
+        android:title="View on Map"
+        android:orderInCategory="100"
+        app:showAsAction="never" />
+
 </menu>
