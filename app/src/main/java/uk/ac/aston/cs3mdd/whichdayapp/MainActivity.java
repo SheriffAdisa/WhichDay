@@ -34,7 +34,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-import uk.ac.aston.cs3mdd.whichdayapp.database.FavoritesDatabaseHelper;
+//import uk.ac.aston.cs3mdd.whichdayapp.database.FavoritesDatabaseHelper;
 import uk.ac.aston.cs3mdd.whichdayapp.models.DaySummary;
 import uk.ac.aston.cs3mdd.whichdayapp.models.WeatherItem;
 import uk.ac.aston.cs3mdd.whichdayapp.models.WeatherResponse;
@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
   private ProgressBar progressBar;    // Spinner to indicate loading
   private LinearLayout recentSearchesContainer; // Container for recent searches
 
-  private FavoritesDatabaseHelper dbHelper; // SQLite database helper for favorites
+  //private FavoritesDatabaseHelper dbHelper; // SQLite database helper for favorites
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Initialize the database helper
-    dbHelper = new FavoritesDatabaseHelper(this);
+    //dbHelper = new FavoritesDatabaseHelper(this);
 
     // Set up button click listener for fetching weather data
     buttonFetchWeather.setOnClickListener(view -> fetchWeatherData());

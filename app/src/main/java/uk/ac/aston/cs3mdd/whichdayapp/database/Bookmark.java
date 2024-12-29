@@ -1,5 +1,6 @@
 package uk.ac.aston.cs3mdd.whichdayapp.database;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
@@ -11,7 +12,9 @@ public class Bookmark {
   private int id;
 
   @ColumnInfo(name = "cityName")
+  @NonNull
   private String cityName;
+
 
   @ColumnInfo(name = "latitude")
   private double latitude;
@@ -30,6 +33,7 @@ public class Bookmark {
   public int getId() { return id; }
   public void setId(int id) { this.id = id; }
 
+  @NonNull
   public String getCityName() { return cityName; }
   public void setCityName(String cityName) { this.cityName = cityName; }
 

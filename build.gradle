@@ -1,14 +1,16 @@
 buildscript {
+
     repositories {
         google()
+        mavenCentral()
     }
+
     dependencies {
         def nav_version = "2.7.1"
         classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$nav_version"
         classpath 'com.android.tools.build:gradle:8.1.1'
     }
 }
-
 
 
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
@@ -18,5 +20,4 @@ alias(libs.plugins.android.application) apply false
 
 
 }
-
 

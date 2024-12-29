@@ -1,5 +1,7 @@
 package uk.ac.aston.cs3mdd.whichdayapp;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -9,16 +11,18 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
@@ -30,6 +34,7 @@ import uk.ac.aston.cs3mdd.whichdayapp.models.DaySummary;
 
 public class WeatherDetailsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
+  private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
   private GoogleMap mMap; // Google Map instance
   private double cityLat; // Latitude of the city
   private double cityLon; // Longitude of the city
@@ -65,6 +70,12 @@ public class WeatherDetailsActivity extends AppCompatActivity implements OnMapRe
             .findFragmentById(R.id.mapFragment);
     if (mapFragment != null) {
       mapFragment.getMapAsync(this);
+    }
+
+    // Request location permissions if not already granted
+    if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED) {
+      ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
     }
 
     // Check if the city is already bookmarked in a background thread
@@ -121,12 +132,9 @@ public class WeatherDetailsActivity extends AppCompatActivity implements OnMapRe
         });
       } else {
         // Add to bookmarks
-        double latitude = getIntent().getDoubleExtra("latitude", 0.0);
-        double longitude = getIntent().getDoubleExtra("longitude", 0.0);
-
-        Bookmark bookmark = new Bookmark(cityName, latitude, longitude);
-
+        Bookmark bookmark = new Bookmark(cityName, cityLat, cityLon);
         db.bookmarkDao().insert(bookmark);
+
         Log.d("Bookmarks", cityName + " added to database");
         isBookmarked = true;
         runOnUiThread(() -> {
@@ -141,6 +149,12 @@ public class WeatherDetailsActivity extends AppCompatActivity implements OnMapRe
   public void onMapReady(GoogleMap googleMap) {
     mMap = googleMap;
 
+    // Enable location if permission is granted
+    if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+            == PackageManager.PERMISSION_GRANTED) {
+      mMap.setMyLocationEnabled(true);
+    }
+
     // Add a marker for the city
     LatLng cityLocation = new LatLng(cityLat, cityLon);
     mMap.addMarker(new MarkerOptions().position(cityLocation).title("Weather in " + cityName));
@@ -154,13 +168,20 @@ public class WeatherDetailsActivity extends AppCompatActivity implements OnMapRe
 
     // Display recommended day
     String recommendedDay = getIntent().getStringExtra("recommendedDay");
-    recommendedDayView.setText("Recommended Day: " + recommendedDay);
+    if (recommendedDay != null) {
+      recommendedDayView.setText("Recommended Day: " + recommendedDay);
+    } else {
+      recommendedDayView.setText("No recommended day available.");
+    }
 
     // Display 5-day forecast
     ArrayList<DaySummary> summaries = getIntent().getParcelableArrayListExtra("summaries");
-    if (summaries != null) {
+    if (summaries != null && !summaries.isEmpty()) {
       ArrayAdapter<DaySummary> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, summaries);
       forecastListView.setAdapter(adapter);
+    } else {
+      forecastListView.setAdapter(null);
+      Toast.makeText(this, "No forecast data available.", Toast.LENGTH_SHORT).show();
     }
   }
 }

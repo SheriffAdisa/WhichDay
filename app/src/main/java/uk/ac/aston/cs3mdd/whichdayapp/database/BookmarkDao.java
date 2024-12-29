@@ -20,13 +20,13 @@ public interface BookmarkDao {
 
   // Retrieves a bookmark by its city name
   @Query("SELECT * FROM bookmarks WHERE cityName = :cityName")
-  Bookmark getBookmark(String cityName); // Ensure parameter matches ":cityName"
+  Bookmark getBookmark(String cityName);
 
   // Deletes a bookmark by its city name
   @Query("DELETE FROM bookmarks WHERE cityName = :cityName")
-  void deleteByName(String cityName); // Ensure parameter matches ":cityName"
+  void deleteByName(String cityName);
 
   // Checks if a bookmark with a given city name exists
   @Query("SELECT EXISTS(SELECT 1 FROM bookmarks WHERE cityName = :cityName)")
-  boolean isBookmarked(String cityName); // Ensure parameter matches ":cityName"
+  boolean isBookmarked(String cityName);
 }

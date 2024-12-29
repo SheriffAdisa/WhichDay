@@ -17,10 +17,10 @@
         app:titleTextColor="@android:color/white" />
 
     <!-- Map Container -->
-    <FrameLayout
+    <fragment
         android:id="@+id/mapFragmentContainer"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="?attr/actionBarSize" />
+        android:layout_height="match_parent" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
