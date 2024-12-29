@@ -39,6 +39,8 @@ public class FavoritesActivity extends AppCompatActivity {
       getSupportActionBar().setDisplayHomeAsUpEnabled(true);
       getSupportActionBar().setTitle("Bookmarks");
     }
+    // Handle back navigation
+    toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
     // RecyclerView setup
     bookmarksRecyclerView = findViewById(R.id.bookmarksRecyclerView);

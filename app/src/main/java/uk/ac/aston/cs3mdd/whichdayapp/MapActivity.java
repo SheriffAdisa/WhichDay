@@ -47,6 +47,15 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     Toolbar toolbar = findViewById(R.id.toolbar);
     setSupportActionBar(toolbar);
 
+    if (getSupportActionBar() != null) {
+      getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+      getSupportActionBar().setTitle("Map View");
+    }
+
+    // Handle back navigation
+    toolbar.setNavigationOnClickListener(v -> onBackPressed());
+
+
     // Initialize the map
     FragmentManager fragmentManager = getSupportFragmentManager();
     SupportMapFragment mapFragment = (SupportMapFragment) fragmentManager.findFragmentById(R.id.mapFragmentContainer);
