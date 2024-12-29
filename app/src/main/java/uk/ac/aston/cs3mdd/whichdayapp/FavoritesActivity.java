@@ -80,7 +80,6 @@ public class FavoritesActivity extends AppCompatActivity {
     }
   }
 
-
   /**
    * Sorts bookmarks alphabetically by city name.
    */
@@ -110,11 +109,7 @@ public class FavoritesActivity extends AppCompatActivity {
         runOnUiThread(() -> {
           bookmarks.clear(); // Clear the current list
           bookmarks.addAll(fetchedBookmarks); // Add new items
-          bookmarkAdapter.notifyDataSetChanged(); // Notify adapter about data change
-
-          if (fetchedBookmarks.isEmpty()) {
-            Toast.makeText(this, "No bookmarks found", Toast.LENGTH_SHORT).show();
-          }
+          bookmarkAdapter.updateList(fetchedBookmarks); // Update adapter's list
         });
       } catch (Exception e) {
         runOnUiThread(() -> Toast.makeText(this, "Failed to load bookmarks.", Toast.LENGTH_SHORT).show());

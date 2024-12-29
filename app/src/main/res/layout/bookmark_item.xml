@@ -1,19 +1,22 @@
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="horizontal"
     android:padding="8dp"
-    android:background="@drawable/bookmark_item_background">
+    android:background="@drawable/rounded_background"
+    android:layout_marginBottom="8dp">
 
     <TextView
         android:id="@+id/bookmark_city_name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:layout_gravity="center"
+        android:textAlignment="center"
         android:text="City Name"
-        android:textSize="18sp"
-        android:textColor="@android:color/black"
+        android:textSize="20sp"
+        android:textColor="@android:color/white"
         android:padding="8dp" />
 
     <Button
@@ -21,6 +24,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Remove"
-        android:background="@drawable/remove_button_background"
-        android:textColor="@android:color/white" />
+        android:textAllCaps="true"
+        android:textSize="16sp"
+        android:textColor="@android:color/white"
+        android:background="@drawable/rounded_button_background"
+        android:drawableEnd="@drawable/ic_delete"
+        android:drawablePadding="8dp"
+        android:padding="8dp"
+        android:paddingStart="15dp"
+        android:contentDescription="@string/remove_bookmark" />
+
 </LinearLayout>

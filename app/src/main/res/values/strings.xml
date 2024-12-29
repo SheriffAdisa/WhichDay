@@ -43,6 +43,8 @@
         libero vel nunc consequat, quis tincidunt nisl eleifend. Cras bibendum enim a justo luctus
         vestibulum. Fusce dictum libero quis erat maximus, vitae volutpat diam dignissim.
     </string>
+    <string name="remove_bookmark">remove bookmark\n</string>
+    <string name="remove">Remove</string>
 
 
 </resources>

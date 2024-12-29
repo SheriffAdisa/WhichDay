@@ -272,8 +272,8 @@ public class MainActivity extends AppCompatActivity {
       // Dynamically create TextViews for each recent search
       TextView textView = new TextView(this);
       textView.setText(city);
-      textView.setTextSize(18);
-      textView.setPadding(20, 20, 20, 20);
+      textView.setTextSize(22);
+      textView.setPadding(20, 35, 20, 35);
       textView.setTextColor(getResources().getColor(android.R.color.white)); // Text color
       textView.setBackgroundResource(R.drawable.city_item_background); // Set rounded background
       textView.setGravity(Gravity.CENTER); // Center text

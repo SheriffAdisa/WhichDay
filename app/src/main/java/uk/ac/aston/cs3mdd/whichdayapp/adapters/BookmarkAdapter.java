@@ -6,11 +6,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 
@@ -23,11 +26,11 @@ import uk.ac.aston.cs3mdd.whichdayapp.database.Bookmark;
 public class BookmarkAdapter extends RecyclerView.Adapter<BookmarkAdapter.BookmarkViewHolder> {
 
   private List<Bookmark> bookmarks; // List of bookmarks to display
-  private Context context; // Context for inflating views and handling navigation
+  private final Context context; // Context for inflating views and handling navigation
 
   // Constructor to initialize the adapter
   public BookmarkAdapter(List<Bookmark> bookmarks, Context context) {
-    this.bookmarks = bookmarks;
+    this.bookmarks = bookmarks != null ? bookmarks : new ArrayList<>();
     this.context = context;
   }
 
@@ -45,14 +48,14 @@ public class BookmarkAdapter extends RecyclerView.Adapter<BookmarkAdapter.Bookma
     // Set the city name
     holder.cityName.setText(bookmark.getCityName());
 
-    // Handle clicking the city name
+    // Navigate to MainActivity when the city name is clicked
     holder.cityName.setOnClickListener(v -> {
       Intent intent = new Intent(context, MainActivity.class);
       intent.putExtra("cityName", bookmark.getCityName());
       context.startActivity(intent);
     });
 
-    // Handle clicking the remove button
+    // Handle removing a bookmark
     holder.removeButton.setOnClickListener(v -> {
       Executors.newSingleThreadExecutor().execute(() -> {
         AppDatabase db = AppDatabase.getInstance(context);
@@ -60,9 +63,9 @@ public class BookmarkAdapter extends RecyclerView.Adapter<BookmarkAdapter.Bookma
 
         // Update UI on the main thread
         ((FavoritesActivity) context).runOnUiThread(() -> {
-          bookmarks.remove(position); // Remove from the list
-          notifyItemRemoved(position); // Notify RecyclerView
-          notifyItemRangeChanged(position, bookmarks.size()); // Update remaining items
+          bookmarks.remove(position); // Remove the bookmark from the list
+          notifyItemRemoved(position); // Notify RecyclerView of the removed item
+          notifyItemRangeChanged(position, bookmarks.size()); // Update the range of affected items
         });
       });
     });
@@ -71,6 +74,19 @@ public class BookmarkAdapter extends RecyclerView.Adapter<BookmarkAdapter.Bookma
   @Override
   public int getItemCount() {
     return bookmarks.size();
+  }
+
+  /**
+   * Updates the bookmark list and refreshes the adapter.
+   *
+   * @param newBookmarks The new list of bookmarks to display.
+   */
+  public void updateList(List<Bookmark> newBookmarks) {
+    this.bookmarks.clear();
+    if (newBookmarks != null) {
+      this.bookmarks.addAll(newBookmarks);
+    }
+    notifyDataSetChanged();
   }
 
   // ViewHolder for each item in the RecyclerView
