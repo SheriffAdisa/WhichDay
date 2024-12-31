@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -218,15 +219,21 @@ public class MainActivity extends AppCompatActivity {
     return true;
   }
 
+
+
+
   // Handle menu item clicks
   @Override
   public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-    if (item.getItemId() == R.id.menu_bookmarks) {
-      // Navigate to FavoritesActivity
-      Intent intent = new Intent(MainActivity.this, FavoritesActivity.class);
+
+    int itemId = item.getItemId();
+
+    if (itemId == R.id.menu_bookmarks) {
+      // Navigate to the bookmarks page
+      Intent intent = new Intent(this, FavoritesActivity.class);
       startActivity(intent);
       return true;
-    } else if (item.getItemId() == R.id.menu_view_map) {
+  } else if (item.getItemId() == R.id.menu_view_map) {
     Intent intent = new Intent(MainActivity.this, MapActivity.class);
     startActivity(intent);
     return true;

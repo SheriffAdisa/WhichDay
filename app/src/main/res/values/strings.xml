@@ -46,6 +46,7 @@
     <string name="remove_bookmark">remove bookmark\n</string>
     <string name="remove">Remove</string>
     <string name="weather_icon">weather icon\n</string>
+    <string name="bookmark">bookmarks\n</string>
 
 
 </resources>

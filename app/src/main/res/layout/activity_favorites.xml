@@ -36,10 +36,14 @@
 
             <androidx.appcompat.widget.SearchView
                 android:id="@+id/searchBar"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:iconifiedByDefault="false"
-                android:queryHint="Search bookmarks..." />
+                android:queryHint="*Search Saved Cities*"
+                android:background="@android:color/transparent"
+                android:textColorHint="@android:color/white"
+                android:textColor="@android:color/white" />
 
             <ImageView
                 android:id="@+id/searchIcon"
@@ -49,17 +53,31 @@
                 app:tint="@android:color/white" />
         </LinearLayout>
 
-        <!-- Saved Cities -->
+        <!-- Saved Cities Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/rounded_background"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp"
+            android:elevation="4dp"
+            android:clipToPadding="false"
+            android:layout_marginTop="16dp"
+            android:layout_marginHorizontal="8dp"
+            android:backgroundTintMode="src_over">
+
+        <!-- Saved Cities Label -->
         <TextView
             android:id="@+id/savedCitiesLabel"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Saved Cities"
             android:textAlignment="center"
-            android:textSize="18sp"
+            android:textSize="26sp"
             android:textStyle="bold"
             android:textColor="@android:color/white"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="16dp" />
 
         <!-- RecyclerView for Bookmarks -->
         <androidx.recyclerview.widget.RecyclerView
@@ -67,7 +85,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:padding="8dp"
-            android:clipToPadding="false"
             android:scrollbars="vertical" />
     </LinearLayout>
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</LinearLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>

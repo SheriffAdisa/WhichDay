@@ -1,11 +1,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
     <item
         android:id="@+id/menu_bookmarks"
         android:title="Bookmarks"
         android:icon="@drawable/ic_showbookmarks"
         app:showAsAction="always" />
-
     <item
         android:id="@+id/menu_view_map"
         android:title="View on Map"
