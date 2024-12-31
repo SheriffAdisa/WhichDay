@@ -93,12 +93,12 @@ public class FavoritesActivity extends AppCompatActivity {
 
   private void sortBookmarksAlphabetically() {
     Collections.sort(bookmarks, (b1, b2) -> b1.getCityName().compareToIgnoreCase(b2.getCityName()));
-    bookmarkAdapter.notifyDataSetChanged();
+    bookmarkAdapter.updateList(bookmarks);
   }
 
   private void sortBookmarksByDate() {
     Collections.sort(bookmarks, (b1, b2) -> Long.compare(b2.getId(), b1.getId()));
-    bookmarkAdapter.notifyDataSetChanged();
+    bookmarkAdapter.updateList(bookmarks);
   }
 
   private void loadBookmarks() {

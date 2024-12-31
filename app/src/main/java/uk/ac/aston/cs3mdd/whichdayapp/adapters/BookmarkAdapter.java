@@ -23,23 +23,32 @@ import uk.ac.aston.cs3mdd.whichdayapp.database.Bookmark;
 
 public class BookmarkAdapter extends RecyclerView.Adapter<BookmarkAdapter.BookmarkViewHolder> {
 
-  private List<Bookmark> bookmarks;
+  private final List<Bookmark> bookmarks; // Original list
+  private final List<Bookmark> filteredBookmarks; // Filtered list
   private final Context context;
 
   public BookmarkAdapter(List<Bookmark> bookmarks, Context context) {
-    this.bookmarks = bookmarks != null ? bookmarks : new ArrayList<>();
+    this.bookmarks = bookmarks != null ? new ArrayList<>(bookmarks) : new ArrayList<>();
+    this.filteredBookmarks = new ArrayList<>(this.bookmarks); // Start with full list
     this.context = context;
   }
 
   public void filter(String query) {
-    List<Bookmark> filteredList = new ArrayList<>();
-    for (Bookmark bookmark : bookmarks) {
-      if (bookmark.getCityName().toLowerCase().contains(query.toLowerCase())) {
-        filteredList.add(bookmark);
+    filteredBookmarks.clear();
+
+    if (query.isEmpty()) {
+      // If query is empty, reset to original list
+      filteredBookmarks.addAll(bookmarks);
+    } else {
+      // Filter based on the query
+      for (Bookmark bookmark : bookmarks) {
+        if (bookmark.getCityName().toLowerCase().contains(query.toLowerCase())) {
+          filteredBookmarks.add(bookmark);
+        }
       }
     }
-    bookmarks = filteredList;
-    notifyDataSetChanged();
+
+    notifyDataSetChanged(); // Notify RecyclerView of the changes
   }
 
   @NonNull
@@ -51,7 +60,7 @@ public class BookmarkAdapter extends RecyclerView.Adapter<BookmarkAdapter.Bookma
 
   @Override
   public void onBindViewHolder(@NonNull BookmarkViewHolder holder, int position) {
-    Bookmark bookmark = bookmarks.get(position);
+    Bookmark bookmark = filteredBookmarks.get(position);
     holder.cityName.setText(bookmark.getCityName());
 
     holder.cityName.setOnClickListener(v -> {
@@ -64,20 +73,23 @@ public class BookmarkAdapter extends RecyclerView.Adapter<BookmarkAdapter.Bookma
       AppDatabase db = AppDatabase.getInstance(context);
       db.bookmarkDao().deleteByName(bookmark.getCityName());
       ((FavoritesActivity) context).runOnUiThread(() -> {
-        bookmarks.remove(position);
-        notifyItemRemoved(position);
-        notifyItemRangeChanged(position, bookmarks.size());
+        bookmarks.remove(bookmark); // Remove from original list
+        filteredBookmarks.remove(bookmark); // Remove from filtered list
+        notifyDataSetChanged(); // Update RecyclerView
       });
     }));
   }
 
   @Override
   public int getItemCount() {
-    return bookmarks.size();
+    return filteredBookmarks.size();
   }
 
   public void updateList(List<Bookmark> newBookmarks) {
-    this.bookmarks = new ArrayList<>(newBookmarks);
+    this.bookmarks.clear();
+    this.bookmarks.addAll(newBookmarks);
+    this.filteredBookmarks.clear();
+    this.filteredBookmarks.addAll(newBookmarks);
     notifyDataSetChanged();
   }
 

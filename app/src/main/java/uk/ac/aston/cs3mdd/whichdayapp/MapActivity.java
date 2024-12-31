@@ -20,7 +20,10 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Executors;
 
@@ -187,4 +190,20 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             .setPositiveButton("OK", null)
             .show();
   }
+
+//  private String formatDate(String date) {
+//    if (date == null || date.isEmpty()) {
+//      Log.e("FormatDate", "Date is null or empty");
+//      return "N/A";
+//    }
+//    SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+//    SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM/yy", Locale.getDefault());
+//    try {
+//      return outputFormat.format(inputFormat.parse(date));
+//    } catch (ParseException e) {
+//      Log.e("FormatDate", "Failed to parse date: " + date, e);
+//      return date; // Fallback to the original date
+//    }
+//  }
+
 }
