@@ -2,10 +2,14 @@ package uk.ac.aston.cs3mdd.whichdayapp;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Outline;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewOutlineProvider;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -253,6 +257,7 @@ public class WeatherDetailsActivity extends AppCompatActivity implements OnMapRe
 
     return R.drawable.ic_unknown;
   }
+
 
 
 }
