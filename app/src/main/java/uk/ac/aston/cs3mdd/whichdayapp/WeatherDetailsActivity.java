@@ -136,6 +136,19 @@ public class WeatherDetailsActivity extends AppCompatActivity implements OnMapRe
     }
   }
 
+  private void updateBookmarkLabel() {
+    TextView bookmarkLabel = findViewById(R.id.bookmarkLabel);
+
+    if (isBookmarked) {
+      bookmarkLabel.setText("City Saved:");
+    } else {
+      bookmarkLabel.setText("Save City");
+    }
+
+    bookmarkLabel.setVisibility(View.VISIBLE);
+  }
+
+
   private void toggleBookmark() {
     executorService.execute(() -> {
       AppDatabase db = AppDatabase.getInstance(this);
@@ -151,13 +164,15 @@ public class WeatherDetailsActivity extends AppCompatActivity implements OnMapRe
 
       runOnUiThread(() -> {
         updateBookmarkIcon();
+        updateBookmarkLabel();
         String message = isBookmarked
-                ? cityName + " added to bookmarks"
-                : cityName + " removed from bookmarks";
+                ? cityName + " Added to bookmarks"
+                : cityName + " Removed from bookmarks";
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
       });
     });
   }
+
 
   @Override
   public void onMapReady(GoogleMap googleMap) {

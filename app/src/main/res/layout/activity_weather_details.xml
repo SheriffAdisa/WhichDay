@@ -15,7 +15,18 @@
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
         app:title="Recommendation"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        app:titleTextColor="@android:color/white" />
+        app:titleTextColor="@android:color/white" >
+
+        <TextView
+        android:id="@+id/bookmarkLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:paddingEnd="10dp"
+        android:text="Add to Bookmark:"
+        android:textColor="@android:color/white"
+        android:visibility="gone" />
+    </androidx.appcompat.widget.Toolbar>
 
     <!-- Main Content -->
     <ScrollView
@@ -53,7 +64,7 @@
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="2dp" >
+                    android:padding="0dp" >
 
                     <!-- Date -->
                     <TextView
@@ -61,7 +72,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:text="DD/MM/YY"
-                        android:textSize="22sp"
+                        android:textSize="20sp"
                         android:textStyle="bold"
                         android:textColor="@android:color/white"
                         app:layout_constraintStart_toStartOf="parent"
@@ -86,7 +97,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:text="0°C"
-                        android:textSize="19sp"
+                        android:textSize="18sp"
                         android:textStyle="bold"
                         android:textColor="@android:color/white"
                         app:layout_constraintStart_toEndOf="@id/recommendedWeatherIcon"
@@ -102,7 +113,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="[Light Rain]"
-                        android:textSize="19sp"
+                        android:textSize="18sp"
                         android:textStyle="bold"
                         android:textColor="@android:color/white"
                         app:layout_constraintEnd_toEndOf="parent"

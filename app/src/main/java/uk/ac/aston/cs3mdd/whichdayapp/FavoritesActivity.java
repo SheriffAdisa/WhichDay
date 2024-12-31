@@ -8,6 +8,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -23,48 +24,58 @@ import uk.ac.aston.cs3mdd.whichdayapp.database.Bookmark;
 
 public class FavoritesActivity extends AppCompatActivity {
 
-  private RecyclerView bookmarksRecyclerView; // RecyclerView for bookmarks
-  private BookmarkAdapter bookmarkAdapter;    // Adapter for RecyclerView
-  private List<Bookmark> bookmarks;           // List of bookmarks from the database
+  private RecyclerView bookmarksRecyclerView;
+  private BookmarkAdapter bookmarkAdapter;
+  private List<Bookmark> bookmarks;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_favorites);
 
-    // Toolbar setup
     Toolbar toolbar = findViewById(R.id.toolbar);
     setSupportActionBar(toolbar);
     if (getSupportActionBar() != null) {
       getSupportActionBar().setDisplayHomeAsUpEnabled(true);
       getSupportActionBar().setTitle("Bookmarks");
     }
-    // Handle back navigation
+
     toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
-    // RecyclerView setup
     bookmarksRecyclerView = findViewById(R.id.bookmarksRecyclerView);
     bookmarksRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-    // Initialize adapter with an empty list
     bookmarks = new ArrayList<>();
     bookmarkAdapter = new BookmarkAdapter(bookmarks, this);
     bookmarksRecyclerView.setAdapter(bookmarkAdapter);
 
-    // Load bookmarks
+    SearchView searchView = findViewById(R.id.searchBar);
+    searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+      @Override
+      public boolean onQueryTextSubmit(String query) {
+        bookmarkAdapter.filter(query);
+        return true;
+      }
+
+      @Override
+      public boolean onQueryTextChange(String newText) {
+        bookmarkAdapter.filter(newText);
+        return true;
+      }
+    });
+
     loadBookmarks();
   }
 
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
-    getMenuInflater().inflate(R.menu.menu_favorites, menu); // Ensure menu_favorites exists
+    getMenuInflater().inflate(R.menu.menu_favorites, menu);
     return true;
   }
 
   @Override
   public boolean onOptionsItemSelected(@NonNull MenuItem item) {
     int itemId = item.getItemId();
-
     if (itemId == R.id.view_map) {
       Intent intent = new Intent(this, MapActivity.class);
       startActivity(intent);
@@ -80,40 +91,29 @@ public class FavoritesActivity extends AppCompatActivity {
     }
   }
 
-  /**
-   * Sorts bookmarks alphabetically by city name.
-   */
   private void sortBookmarksAlphabetically() {
     Collections.sort(bookmarks, (b1, b2) -> b1.getCityName().compareToIgnoreCase(b2.getCityName()));
     bookmarkAdapter.notifyDataSetChanged();
   }
 
-  /**
-   * Sorts bookmarks by creation date (descending order).
-   */
   private void sortBookmarksByDate() {
-    Collections.sort(bookmarks, (b1, b2) -> Long.compare(b2.getId(), b1.getId())); // Descending by ID
+    Collections.sort(bookmarks, (b1, b2) -> Long.compare(b2.getId(), b1.getId()));
     bookmarkAdapter.notifyDataSetChanged();
   }
 
-  /**
-   * Loads the list of bookmarks from the database and sets up the RecyclerView.
-   */
   private void loadBookmarks() {
     Executors.newSingleThreadExecutor().execute(() -> {
       try {
         AppDatabase db = AppDatabase.getInstance(this);
         List<Bookmark> fetchedBookmarks = db.bookmarkDao().getAllBookmarks();
-
-        // Update the UI on the main thread
         runOnUiThread(() -> {
-          bookmarks.clear(); // Clear the current list
-          bookmarks.addAll(fetchedBookmarks); // Add new items
-          bookmarkAdapter.updateList(fetchedBookmarks); // Update adapter's list
+          bookmarks.clear();
+          bookmarks.addAll(fetchedBookmarks);
+          bookmarkAdapter.updateList(fetchedBookmarks);
         });
       } catch (Exception e) {
         runOnUiThread(() -> Toast.makeText(this, "Failed to load bookmarks.", Toast.LENGTH_SHORT).show());
-        e.printStackTrace(); // Log the error for debugging
+        e.printStackTrace();
       }
     });
   }
@@ -121,6 +121,6 @@ public class FavoritesActivity extends AppCompatActivity {
   @Override
   protected void onResume() {
     super.onResume();
-    loadBookmarks(); // Refresh data when returning to the activity
+    loadBookmarks();
   }
 }

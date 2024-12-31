@@ -97,9 +97,9 @@ public class MainActivity extends AppCompatActivity {
 
   // Fetch weather data from OpenWeatherMap API
   private void fetchWeatherData() {
-    String cityName = editTextCity.getText().toString().trim();
+    String cityNameInput = editTextCity.getText().toString().trim();
 
-    if (cityName.isEmpty()) {
+    if (cityNameInput.isEmpty()) {
       Toast.makeText(this, "City name cannot be empty.", Toast.LENGTH_SHORT).show();
       return;
     }
@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
             .build();
 
     WeatherApi weatherApi = retrofit.create(WeatherApi.class);
-    Call<WeatherResponse> call = weatherApi.getWeatherByCityName(cityName, API_KEY);
+    Call<WeatherResponse> call = weatherApi.getWeatherByCityName(cityNameInput, API_KEY);
 
     call.enqueue(new Callback<WeatherResponse>() {
       @Override
@@ -127,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
         if (response.isSuccessful() && response.body() != null) {
           WeatherResponse weatherResponse = response.body();
 
-          // Extract necessary data
+          // Extract necessary data from the response
           double cityLat = weatherResponse.getCity().getCoord().getLat();
           double cityLon = weatherResponse.getCity().getCoord().getLon();
           String cityName = weatherResponse.getCity().getName();
@@ -144,23 +144,24 @@ public class MainActivity extends AppCompatActivity {
           intent.putExtra("cityLat", cityLat);
           intent.putExtra("cityLon", cityLon);
           intent.putExtra("cityName", cityName);
-          //intent.putExtra("recommendedDay", bestDay != null ? bestDay.getDate() + " - " + bestDay.getDescription() : "No recommendation available");
-          // Pass the recommended day, description, and temperature
-          intent.putExtra("recommendedDay", "2024-12-31"); // Example data
-          intent.putExtra("recommendedDescription", "Light Rain");
-          intent.putExtra("recommendedTemp", 20.5); // Example temperature
-          // Pass the city details (latitude, longitude, name)
-          intent.putExtra("cityLat", 51.5074); // Example latitude
-          intent.putExtra("cityLon", -0.1278); // Example longitude
-          intent.putExtra("cityName", "London");
 
+          if (bestDay != null) {
+            intent.putExtra("recommendedDay", bestDay.getDate());
+            intent.putExtra("recommendedDescription", bestDay.getDescription());
+            intent.putExtra("recommendedTemp", bestDay.getAvgTemp());
+          } else {
+            intent.putExtra("recommendedDay", "N/A");
+            intent.putExtra("recommendedDescription", "No recommendation available.");
+            intent.putExtra("recommendedTemp", 0.0);
+          }
 
           intent.putParcelableArrayListExtra("summaries", new ArrayList<>(summaries));
           startActivity(intent);
         } else {
           Toast.makeText(MainActivity.this, "Invalid city name. Please try again.", Toast.LENGTH_SHORT).show();
         }
-        saveToRecentSearches(cityName);
+
+        saveToRecentSearches(cityNameInput);
       }
 
       @Override
@@ -173,8 +174,9 @@ public class MainActivity extends AppCompatActivity {
     });
   }
 
+
   // Group forecasts by date
-  private Map<String, List<WeatherItem>> groupForecastsByDay(List<WeatherItem> forecastList) {
+  public static Map<String, List<WeatherItem>> groupForecastsByDay(List<WeatherItem> forecastList) {
     Map<String, List<WeatherItem>> dailyForecasts = new HashMap<>();
     for (WeatherItem item : forecastList) {
       String date = item.getDt_txt().split(" ")[0]; // Extract date
@@ -185,7 +187,7 @@ public class MainActivity extends AppCompatActivity {
   }
 
   // Calculate daily summaries
-  private List<DaySummary> calculateDailySummaries(Map<String, List<WeatherItem>> dailyForecasts) {
+  public static List<DaySummary> calculateDailySummaries(Map<String, List<WeatherItem>> dailyForecasts) {
     List<DaySummary> summaries = new ArrayList<>();
     for (Map.Entry<String, List<WeatherItem>> entry : dailyForecasts.entrySet()) {
       String date = entry.getKey();
@@ -203,7 +205,7 @@ public class MainActivity extends AppCompatActivity {
   }
 
   // Get the best day (highest temperature)
-  private DaySummary getBestDay(List<DaySummary> summaries) {
+  public static DaySummary getBestDay(List<DaySummary> summaries) {
     return summaries.stream()
             .max(Comparator.comparingDouble(DaySummary::getAvgTemp))
             .orElse(null);

@@ -11,7 +11,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import uk.ac.aston.cs3mdd.whichdayapp.database.BookmarkDao;
 
-@Database(entities = {Bookmark.class}, version = 5, exportSchema = true)
+@Database(entities = {Bookmark.class}, version = 6, exportSchema = true)
 public abstract class AppDatabase extends RoomDatabase {
   private static volatile AppDatabase instance;
 
@@ -23,7 +23,7 @@ public abstract class AppDatabase extends RoomDatabase {
         if (instance == null) {
           instance = Room.databaseBuilder(context.getApplicationContext(),
                           AppDatabase.class, "app_database")
-                  .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+                  .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
                   .fallbackToDestructiveMigration()
                   .build();
         }
@@ -79,7 +79,8 @@ public abstract class AppDatabase extends RoomDatabase {
                       "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
                       "cityName TEXT NOT NULL, " +
                       "latitude REAL NOT NULL, " +
-                      "longitude REAL NOT NULL)"
+                      "longitude REAL NOT NULL, " +
+                      "recommendedDay TEXT DEFAULT NULL)"
       );
       database.execSQL(
               "INSERT INTO bookmarks_temp (id, cityName, latitude, longitude) " +
@@ -89,6 +90,15 @@ public abstract class AppDatabase extends RoomDatabase {
       database.execSQL("ALTER TABLE bookmarks_temp RENAME TO bookmarks");
     }
   };
+
+  static final Migration MIGRATION_5_6 = new Migration(5, 6) {
+    @Override
+    public void migrate(@NonNull SupportSQLiteDatabase database) {
+      database.execSQL("ALTER TABLE bookmarks ADD COLUMN recommendedDay TEXT DEFAULT NULL");
+    }
+  };
+
+
 
 
 

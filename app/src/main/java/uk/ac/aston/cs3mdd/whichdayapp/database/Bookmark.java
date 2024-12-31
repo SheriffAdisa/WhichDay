@@ -22,6 +22,20 @@ public class Bookmark {
   @ColumnInfo(name = "longitude")
   private double longitude;
 
+
+  // Add this field to store the recommended day
+  private String recommendedDay;
+
+  // Getters and Setters
+  public String getRecommendedDay() {
+    return recommendedDay;
+  }
+
+  public void setRecommendedDay(String recommendedDay) {
+    this.recommendedDay = recommendedDay;
+  }
+
+
   // Constructor
   public Bookmark(String cityName, double latitude, double longitude) {
     this.cityName = cityName;

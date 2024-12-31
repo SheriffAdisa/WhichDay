@@ -6,6 +6,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
@@ -19,24 +20,28 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 import uk.ac.aston.cs3mdd.whichdayapp.database.AppDatabase;
 import uk.ac.aston.cs3mdd.whichdayapp.database.Bookmark;
+import uk.ac.aston.cs3mdd.whichdayapp.models.DaySummary;
+import uk.ac.aston.cs3mdd.whichdayapp.models.WeatherItem;
+import uk.ac.aston.cs3mdd.whichdayapp.models.WeatherResponse;
 
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
   private GoogleMap googleMap;
   private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
+
+  private static final String BASE_URL = "https://api.openweathermap.org/";
+  private static final String API_KEY = "796b2ffe49982b3d99a31e32d87ff3ef";
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +59,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     // Handle back navigation
     toolbar.setNavigationOnClickListener(v -> onBackPressed());
-
 
     // Initialize the map
     FragmentManager fragmentManager = getSupportFragmentManager();
@@ -97,10 +101,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
       String cityName = marker.getTitle();
       LatLng position = marker.getPosition();
 
-      // Fetch nearby cities when a marker is clicked
-      fetchNearbyCities(position.latitude, position.longitude);
-      Toast.makeText(this, "Fetching nearby cities for: " + cityName, Toast.LENGTH_SHORT).show();
-      return true;
+      // Fetch weather data for the clicked city
+      fetchWeatherDataForCity(cityName);
+      return true; // Indicate that the click is handled
     });
 
     // Load bookmarks and add markers to the map
@@ -136,61 +139,52 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     });
   }
 
-  private void fetchNearbyCities(double latitude, double longitude) {
-    String apiKey = "AIzaSyCNvbZUQmHLWz_4mVYv7wX0YQPWGRl_XuM"; // Replace with your actual API key
-    String location = latitude + "," + longitude;
-    int radius = 50000; // Radius in meters (50km)
+  private void fetchWeatherDataForCity(String cityName) {
+    Retrofit retrofit = new Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build();
 
-    String url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="
-            + location + "&radius=" + radius + "&type=locality&key=" + apiKey;
+    WeatherApi weatherApi = retrofit.create(WeatherApi.class);
+    Call<WeatherResponse> call = weatherApi.getWeatherByCityName(cityName, API_KEY);
 
-    Executors.newSingleThreadExecutor().execute(() -> {
-      try {
-        URL requestUrl = new URL(url);
-        HttpURLConnection connection = (HttpURLConnection) requestUrl.openConnection();
-        connection.setRequestMethod("GET");
+    call.enqueue(new Callback<WeatherResponse>() {
+      @Override
+      public void onResponse(Call<WeatherResponse> call, Response<WeatherResponse> response) {
+        if (response.isSuccessful() && response.body() != null) {
+          WeatherResponse weatherResponse = response.body();
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-        StringBuilder response = new StringBuilder();
-        String line;
-        while ((line = reader.readLine()) != null) {
-          response.append(line);
-        }
-        reader.close();
+          // Process weather data
+          Map<String, List<WeatherItem>> dailyForecasts = MainActivity.groupForecastsByDay(weatherResponse.getList());
+          List<DaySummary> summaries = MainActivity.calculateDailySummaries(dailyForecasts);
 
-        // Parse the JSON response
-        JSONObject jsonResponse = new JSONObject(response.toString());
-        JSONArray results = jsonResponse.getJSONArray("results");
+          // Find the recommended day
+          DaySummary bestDay = MainActivity.getBestDay(summaries);
 
-        runOnUiThread(() -> {
-          googleMap.clear(); // Clear existing markers
-
-          try {
-            for (int i = 0; i < results.length(); i++) {
-              JSONObject place = results.getJSONObject(i);
-              JSONObject locationObj = place.getJSONObject("geometry").getJSONObject("location");
-              double lat = locationObj.getDouble("lat");
-              double lng = locationObj.getDouble("lng");
-              String name = place.getString("name");
-
-              LatLng position = new LatLng(lat, lng);
-              googleMap.addMarker(new MarkerOptions()
-                      .position(position)
-                      .title(name));
+          runOnUiThread(() -> {
+            if (bestDay != null) {
+              showPopup(cityName, bestDay.getDate(), bestDay.getDescription());
+            } else {
+              showPopup(cityName, "No recommendation available", "");
             }
+          });
+        } else {
+          runOnUiThread(() -> showPopup(cityName, "No recommendation available", ""));
+        }
+      }
 
-            // Center the map on the selected location
-            LatLng selectedLocation = new LatLng(latitude, longitude);
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(selectedLocation, 10));
-          } catch (JSONException e) {
-            e.printStackTrace();
-            Toast.makeText(this, "Failed to parse places data", Toast.LENGTH_SHORT).show();
-          }
-        });
-      } catch (Exception e) {
-        e.printStackTrace();
-        runOnUiThread(() -> Toast.makeText(this, "Failed to fetch nearby cities", Toast.LENGTH_SHORT).show());
+      @Override
+      public void onFailure(Call<WeatherResponse> call, Throwable t) {
+        runOnUiThread(() -> showPopup(cityName, "Error fetching data", t.getMessage()));
       }
     });
+  }
+
+  private void showPopup(String cityName, String recommendedDay, String description) {
+    new AlertDialog.Builder(this)
+            .setTitle(cityName)
+            .setMessage("Recommended Day: " + recommendedDay + "\nDescription: " + description)
+            .setPositiveButton("OK", null)
+            .show();
   }
 }
