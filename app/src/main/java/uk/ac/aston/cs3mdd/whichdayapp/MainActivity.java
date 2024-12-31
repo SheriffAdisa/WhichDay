@@ -144,7 +144,17 @@ public class MainActivity extends AppCompatActivity {
           intent.putExtra("cityLat", cityLat);
           intent.putExtra("cityLon", cityLon);
           intent.putExtra("cityName", cityName);
-          intent.putExtra("recommendedDay", bestDay != null ? bestDay.getDate() + " - " + bestDay.getDescription() : "No recommendation available");
+          //intent.putExtra("recommendedDay", bestDay != null ? bestDay.getDate() + " - " + bestDay.getDescription() : "No recommendation available");
+          // Pass the recommended day, description, and temperature
+          intent.putExtra("recommendedDay", "2024-12-31"); // Example data
+          intent.putExtra("recommendedDescription", "Light Rain");
+          intent.putExtra("recommendedTemp", 20.5); // Example temperature
+          // Pass the city details (latitude, longitude, name)
+          intent.putExtra("cityLat", 51.5074); // Example latitude
+          intent.putExtra("cityLon", -0.1278); // Example longitude
+          intent.putExtra("cityName", "London");
+
+
           intent.putParcelableArrayListExtra("summaries", new ArrayList<>(summaries));
           startActivity(intent);
         } else {

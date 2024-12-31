@@ -6,10 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,7 +25,10 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -74,19 +74,18 @@ public class WeatherDetailsActivity extends AppCompatActivity implements OnMapRe
     cityLat = getIntent().getDoubleExtra("cityLat", 0.0);
     cityLon = getIntent().getDoubleExtra("cityLon", 0.0);
     cityName = getIntent().getStringExtra("cityName");
+
+    Log.d("IntentData", "City Lat: " + cityLat);
+    Log.d("IntentData", "City Lon: " + cityLon);
+    Log.d("IntentData", "City Name: " + cityName);
   }
 
   private void setupMapFragment() {
-    SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-            .findFragmentById(R.id.mapFragment);
-
-    if (mapFragment == null) {
-      mapFragment = SupportMapFragment.newInstance();
-      getSupportFragmentManager()
-              .beginTransaction()
-              .replace(R.id.mapFragment, mapFragment)
-              .commit();
-    }
+    SupportMapFragment mapFragment = SupportMapFragment.newInstance();
+    getSupportFragmentManager()
+            .beginTransaction()
+            .replace(R.id.mapFragment, mapFragment)
+            .commit();
 
     mapFragment.getMapAsync(this);
   }
@@ -160,6 +159,7 @@ public class WeatherDetailsActivity extends AppCompatActivity implements OnMapRe
   public void onMapReady(GoogleMap googleMap) {
     try {
       mMap = googleMap;
+
       LatLng cityLocation = new LatLng(cityLat, cityLon);
       mMap.addMarker(new MarkerOptions()
               .position(cityLocation)
@@ -171,43 +171,42 @@ public class WeatherDetailsActivity extends AppCompatActivity implements OnMapRe
         mMap.setMyLocationEnabled(true);
       }
     } catch (Exception e) {
+      Log.e("MapError", "Error loading map: " + e.getMessage(), e);
       Toast.makeText(this, "Error loading map: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-      e.printStackTrace();
     }
   }
-
-  private void setListViewHeightBasedOnChildren(ListView listView) {
-    ArrayAdapter adapter = (ArrayAdapter) listView.getAdapter();
-    if (adapter == null) {
-      return;
-    }
-
-    int totalHeight = 0;
-    for (int i = 0; i < adapter.getCount(); i++) {
-      View listItem = adapter.getView(i, null, listView);
-      listItem.measure(
-              View.MeasureSpec.makeMeasureSpec(listView.getWidth(), View.MeasureSpec.EXACTLY),
-              View.MeasureSpec.UNSPECIFIED
-      );
-      totalHeight += listItem.getMeasuredHeight();
-    }
-
-    ViewGroup.LayoutParams params = listView.getLayoutParams();
-    params.height = totalHeight + (listView.getDividerHeight() * (adapter.getCount() - 1));
-    listView.setLayoutParams(params);
-    listView.requestLayout();
-  }
-
 
   private void setupUI() {
-    TextView recommendedDayView = findViewById(R.id.recommendedDayView);
-    RecyclerView forecastRecyclerView = findViewById(R.id.forecastRecyclerView);
+    // Recommended Day Section
+    TextView recommendedDateView = findViewById(R.id.recommendedDate);
+    ImageView recommendedWeatherIcon = findViewById(R.id.recommendedWeatherIcon);
+    TextView recommendedTempView = findViewById(R.id.recommendedTemp);
+    TextView recommendedDescriptionView = findViewById(R.id.recommendedDescription);
 
     String recommendedDay = getIntent().getStringExtra("recommendedDay");
-    recommendedDayView.setText(recommendedDay != null
-            ? "Recommended Day: " + recommendedDay
-            : "No recommended day available.");
+    String recommendedDescription = getIntent().getStringExtra("recommendedDescription");
+    double recommendedTemp = getIntent().getDoubleExtra("recommendedTemp", 0.0);
 
+
+    Log.d("IntentData", "Recommended Day: " + recommendedDay);
+    Log.d("IntentData", "Recommended Description: " + recommendedDescription);
+    Log.d("IntentData", "Recommended Temp: " + recommendedTemp);
+
+
+    if (recommendedDay != null && recommendedDescription != null) {
+      recommendedDateView.setText(formatDate(recommendedDay));
+      recommendedTempView.setText(String.format(Locale.getDefault(), "%.1f°C", recommendedTemp));
+      recommendedDescriptionView.setText(recommendedDescription);
+      recommendedWeatherIcon.setImageResource(getWeatherIcon(recommendedDescription));
+    } else {
+      recommendedDateView.setText("N/A");
+      recommendedTempView.setText("N/A");
+      recommendedDescriptionView.setText("N/A");
+      recommendedWeatherIcon.setImageResource(R.drawable.ic_unknown);
+    }
+
+    // Forecast Section
+    RecyclerView forecastRecyclerView = findViewById(R.id.forecastRecyclerView);
     ArrayList<DaySummary> summaries = getIntent().getParcelableArrayListExtra("summaries");
     if (summaries != null && !summaries.isEmpty()) {
       ForecastAdapter adapter = new ForecastAdapter(summaries);
@@ -218,9 +217,42 @@ public class WeatherDetailsActivity extends AppCompatActivity implements OnMapRe
     }
   }
 
+  private String formatDate(String date) {
+    if (date == null || date.isEmpty()) {
+      Log.e("FormatDate", "Date is null or empty");
+      return "N/A";
+    }
+    SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+    SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM/yy", Locale.getDefault());
+    try {
+      return outputFormat.format(inputFormat.parse(date));
+    } catch (ParseException e) {
+      Log.e("FormatDate", "Failed to parse date: " + date, e);
+      return date; // Fallback to the original date
+    }
+  }
 
 
+  private int getWeatherIcon(String description) {
+    if (description == null) return R.drawable.ic_unknown;
 
+    String desc = description.toLowerCase();
+    if (desc.contains("rain")) {
+      return R.drawable.ic_rain;
+    } else if (desc.contains("sun")) {
+      return R.drawable.ic_sunny;
+    } else if (desc.contains("cloud")) {
+      return R.drawable.ic_cloud;
+    } else if (desc.contains("snow")) {
+      return R.drawable.ic_snow;
+    } else if (desc.contains("storm")) {
+      return R.drawable.ic_thunderstorm;
+    } else if (desc.contains("mist")) {
+      return R.drawable.ic_mist;
+    }
+
+    return R.drawable.ic_unknown;
+  }
 
 
 }
