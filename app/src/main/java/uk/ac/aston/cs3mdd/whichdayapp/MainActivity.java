@@ -10,7 +10,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -25,6 +24,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,68 +35,44 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-//import uk.ac.aston.cs3mdd.whichdayapp.database.FavoritesDatabaseHelper;
 import uk.ac.aston.cs3mdd.whichdayapp.models.DaySummary;
 import uk.ac.aston.cs3mdd.whichdayapp.models.WeatherItem;
 import uk.ac.aston.cs3mdd.whichdayapp.models.WeatherResponse;
 
 public class MainActivity extends AppCompatActivity {
 
-  // OpenWeatherMap API base URL and key
   private static final String BASE_URL = "https://api.openweathermap.org/";
   private static final String API_KEY = "796b2ffe49982b3d99a31e32d87ff3ef";
 
-  // UI components
-  private EditText editTextCity;       // User input for city name
-  private Button buttonFetchWeather;  // Button to fetch weather data
-  private ProgressBar progressBar;    // Spinner to indicate loading
-  private LinearLayout recentSearchesContainer; // Container for recent searches
-
-  //private FavoritesDatabaseHelper dbHelper; // SQLite database helper for favorites
+  private EditText editTextCity;
+  private Button buttonFetchWeather;
+  private ProgressBar progressBar;
+  private LinearLayout recentSearchesContainer;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
-    // Set up the toolbar
     Toolbar toolbar = findViewById(R.id.toolbar);
     setSupportActionBar(toolbar);
 
-    // Link UI components to XML
     editTextCity = findViewById(R.id.editTextCity);
     buttonFetchWeather = findViewById(R.id.buttonFetchWeather);
     progressBar = findViewById(R.id.progressBar);
     recentSearchesContainer = findViewById(R.id.recentSearchesContainer);
 
-    // Log errors if critical views are null
-    if (progressBar == null) {
-      Log.e("MainActivity", "ProgressBar is null. Ensure it exists in the layout.");
-    }
-    if (recentSearchesContainer == null) {
-      Log.e("MainActivity", "recentSearchesContainer is null. Check your layout file.");
-    }
-
-    // Initialize the database helper
-    //dbHelper = new FavoritesDatabaseHelper(this);
-
-    // Set up button click listener for fetching weather data
     buttonFetchWeather.setOnClickListener(view -> fetchWeatherData());
 
-    // Check if launched from a bookmark
     String bookmarkedCity = getIntent().getStringExtra("cityName");
     if (bookmarkedCity != null) {
       editTextCity.setText(bookmarkedCity);
       fetchWeatherData();
     }
 
-    // Update the UI for recent searches
-    if (recentSearchesContainer != null) {
-      updateRecentSearchesUI();
-    }
+    updateRecentSearchesUI();
   }
 
-  // Fetch weather data from OpenWeatherMap API
   private void fetchWeatherData() {
     String cityNameInput = editTextCity.getText().toString().trim();
 
@@ -105,11 +81,8 @@ public class MainActivity extends AppCompatActivity {
       return;
     }
 
-    if (progressBar != null) {
-      progressBar.setVisibility(View.VISIBLE); // Show progress bar during API call
-    }
+    progressBar.setVisibility(View.VISIBLE);
 
-    // Set up Retrofit for the API call
     Retrofit retrofit = new Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
@@ -121,26 +94,17 @@ public class MainActivity extends AppCompatActivity {
     call.enqueue(new Callback<WeatherResponse>() {
       @Override
       public void onResponse(Call<WeatherResponse> call, Response<WeatherResponse> response) {
-        if (progressBar != null) {
-          progressBar.setVisibility(View.GONE); // Hide progress bar
-        }
+        progressBar.setVisibility(View.GONE);
 
         if (response.isSuccessful() && response.body() != null) {
           WeatherResponse weatherResponse = response.body();
-
-          // Extract necessary data from the response
           double cityLat = weatherResponse.getCity().getCoord().getLat();
           double cityLon = weatherResponse.getCity().getCoord().getLon();
           String cityName = weatherResponse.getCity().getName();
 
-          // Process weather data
-          Map<String, List<WeatherItem>> dailyForecasts = groupForecastsByDay(weatherResponse.getList());
-          List<DaySummary> summaries = calculateDailySummaries(dailyForecasts);
-
-          // Find the recommended day
+          List<DaySummary> summaries = calculateDailySummaries(groupForecastsByDay(weatherResponse.getList()));
           DaySummary bestDay = getBestDay(summaries);
 
-          // Navigate to WeatherDetailsActivity with the data
           Intent intent = new Intent(MainActivity.this, WeatherDetailsActivity.class);
           intent.putExtra("cityLat", cityLat);
           intent.putExtra("cityLon", cityLon);
@@ -158,87 +122,29 @@ public class MainActivity extends AppCompatActivity {
 
           intent.putParcelableArrayListExtra("summaries", new ArrayList<>(summaries));
           startActivity(intent);
+
+          saveToRecentSearches(cityNameInput);
         } else {
           Toast.makeText(MainActivity.this, "Invalid city name. Please try again.", Toast.LENGTH_SHORT).show();
         }
-
-        saveToRecentSearches(cityNameInput);
       }
 
       @Override
       public void onFailure(Call<WeatherResponse> call, Throwable t) {
-        if (progressBar != null) {
-          progressBar.setVisibility(View.GONE); // Hide progress bar
-        }
+        progressBar.setVisibility(View.GONE);
         Toast.makeText(MainActivity.this, "API request failed: " + t.getMessage(), Toast.LENGTH_SHORT).show();
       }
     });
   }
 
+  private List<String> getRecentSearches() {
+    SharedPreferences prefs = getSharedPreferences("RecentSearchesPrefs", MODE_PRIVATE);
+    Set<String> recentSearches = prefs.getStringSet("recentSearches", new LinkedHashSet<>());
 
-  // Group forecasts by date
-  public static Map<String, List<WeatherItem>> groupForecastsByDay(List<WeatherItem> forecastList) {
-    Map<String, List<WeatherItem>> dailyForecasts = new HashMap<>();
-    for (WeatherItem item : forecastList) {
-      String date = item.getDt_txt().split(" ")[0]; // Extract date
-      dailyForecasts.putIfAbsent(date, new ArrayList<>());
-      dailyForecasts.get(date).add(item);
-    }
-    return dailyForecasts;
-  }
-
-  // Calculate daily summaries
-  public static List<DaySummary> calculateDailySummaries(Map<String, List<WeatherItem>> dailyForecasts) {
-    List<DaySummary> summaries = new ArrayList<>();
-    for (Map.Entry<String, List<WeatherItem>> entry : dailyForecasts.entrySet()) {
-      String date = entry.getKey();
-      List<WeatherItem> items = entry.getValue();
-
-      double avgTemp = items.stream()
-              .mapToDouble(item -> item.getMain().getTemp())
-              .average()
-              .orElse(0.0);
-
-      String description = items.get(0).getWeather().get(0).getDescription();
-      summaries.add(new DaySummary(date, avgTemp - 273.15, description)); // Convert Kelvin to Celsius
-    }
-    return summaries;
-  }
-
-  // Get the best day (highest temperature)
-  public static DaySummary getBestDay(List<DaySummary> summaries) {
-    return summaries.stream()
-            .max(Comparator.comparingDouble(DaySummary::getAvgTemp))
-            .orElse(null);
-  }
-
-  // Inflate the menu
-  @Override
-  public boolean onCreateOptionsMenu(Menu menu) {
-    getMenuInflater().inflate(R.menu.menu_main, menu);
-    return true;
-  }
-
-
-
-
-  // Handle menu item clicks
-  @Override
-  public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-
-    int itemId = item.getItemId();
-
-    if (itemId == R.id.menu_bookmarks) {
-      // Navigate to the bookmarks page
-      Intent intent = new Intent(this, FavoritesActivity.class);
-      startActivity(intent);
-      return true;
-  } else if (item.getItemId() == R.id.menu_view_map) {
-    Intent intent = new Intent(MainActivity.this, MapActivity.class);
-    startActivity(intent);
-    return true;
-  }
-    return super.onOptionsItemSelected(item);
+    // Convert Set to List and reverse to show latest first
+    List<String> recentList = new ArrayList<>(recentSearches);
+    Collections.reverse(recentList);
+    return recentList;
   }
 
   private void saveToRecentSearches(String cityName) {
@@ -262,36 +168,43 @@ public class MainActivity extends AppCompatActivity {
     updateRecentSearchesUI();
   }
 
-  private List<String> getRecentSearches() {
-    SharedPreferences prefs = getSharedPreferences("RecentSearchesPrefs", MODE_PRIVATE);
-    Set<String> recentSearches = prefs.getStringSet("recentSearches", new LinkedHashSet<>());
-
-    // Convert Set to List and reverse to show latest first
-    List<String> recentList = new ArrayList<>(recentSearches);
-    Collections.reverse(recentList);
-    return recentList;
-  }
-
   private void updateRecentSearchesUI() {
     if (recentSearchesContainer == null) {
       Log.e("MainActivity", "recentSearchesContainer is null. Skipping update.");
       return;
     }
 
+    // Clear all dynamically added views
+    recentSearchesContainer.removeAllViews();
+
+    // Add the "Recently Searched" label at the top
+    TextView label = new TextView(this);
+    label.setText("Recently Searched:");
+    label.setTextSize(28);
+    label.setTypeface(null, android.graphics.Typeface.BOLD); // Make the text bold
+    label.setTextColor(getResources().getColor(android.R.color.white));
+    label.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+    label.setGravity(Gravity.CENTER);
+
+
+    // Add margin below the label
+    LinearLayout.LayoutParams labelParams = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+    );
+    labelParams.setMargins(0, 0, 0, 20); // Add space below the label
+    label.setLayoutParams(labelParams);
+
+    recentSearchesContainer.addView(label);
+
     // Get the list of recent searches
     List<String> recentSearches = getRecentSearches();
-
-    // Clear only the dynamically added views (not the "Recently Searched" label)
-    int childCount = recentSearchesContainer.getChildCount();
-    if (childCount > 1) { // Keep the first child (the "Recently Searched" label)
-      recentSearchesContainer.removeViews(1, childCount - 1);
-    }
 
     for (String city : recentSearches) {
       // Dynamically create TextViews for each recent search
       TextView textView = new TextView(this);
       textView.setText(city);
-      textView.setTextSize(22);
+      textView.setTextSize(24);
       textView.setPadding(20, 35, 20, 35);
       textView.setTextColor(getResources().getColor(android.R.color.white)); // Text color
       textView.setBackgroundResource(R.drawable.city_item_background); // Set rounded background
@@ -306,11 +219,65 @@ public class MainActivity extends AppCompatActivity {
               LinearLayout.LayoutParams.MATCH_PARENT,
               LinearLayout.LayoutParams.WRAP_CONTENT
       );
-      params.setMargins(0, 8, 0, 8); // Top and bottom margin
+      params.setMargins(0, 12, 0, 12); // Top and bottom margin
       textView.setLayoutParams(params);
 
       // Add the TextView to the container
       recentSearchesContainer.addView(textView);
     }
+  }
+
+
+  public static Map<String, List<WeatherItem>> groupForecastsByDay(List<WeatherItem> forecastList) {
+    Map<String, List<WeatherItem>> dailyForecasts = new HashMap<>();
+    for (WeatherItem item : forecastList) {
+      String date = item.getDt_txt().split(" ")[0];
+      dailyForecasts.putIfAbsent(date, new ArrayList<>());
+      dailyForecasts.get(date).add(item);
+    }
+    return dailyForecasts;
+  }
+
+  public static List<DaySummary> calculateDailySummaries(Map<String, List<WeatherItem>> dailyForecasts) {
+    List<DaySummary> summaries = new ArrayList<>();
+    for (Map.Entry<String, List<WeatherItem>> entry : dailyForecasts.entrySet()) {
+      String date = entry.getKey();
+      List<WeatherItem> items = entry.getValue();
+
+      double avgTemp = items.stream()
+              .mapToDouble(item -> item.getMain().getTemp())
+              .average()
+              .orElse(0.0);
+
+      String description = items.get(0).getWeather().get(0).getDescription();
+      summaries.add(new DaySummary(date, avgTemp - 273.15, description));
+    }
+    return summaries;
+  }
+
+  public static DaySummary getBestDay(List<DaySummary> summaries) {
+    return summaries.stream()
+            .max(Comparator.comparingDouble(DaySummary::getAvgTemp))
+            .orElse(null);
+  }
+
+  @Override
+  public boolean onCreateOptionsMenu(Menu menu) {
+    getMenuInflater().inflate(R.menu.menu_main, menu);
+    return true;
+  }
+
+  @Override
+  public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+    if (item.getItemId() == R.id.menu_bookmarks) {
+      Intent intent = new Intent(this, FavoritesActivity.class);
+      startActivity(intent);
+      return true;
+    } else if (item.getItemId() == R.id.menu_view_map) {
+      Intent intent = new Intent(this, MapActivity.class);
+      startActivity(intent);
+      return true;
+    }
+    return super.onOptionsItemSelected(item);
   }
 }
