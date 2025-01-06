@@ -1,33 +1,93 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/FavoritesActivity"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/sky_background"
+    tools:context=".FavoritesActivity">
 
-    <!-- Toolbar at the top -->
+    <!-- Toolbar -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
+        android:background="#000000"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        app:title="Bookmarks"
+        app:titleTextColor="@android:color/white" />
 
-    <!-- Content below the Toolbar -->
+    <!-- Main Content -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize"
         android:orientation="vertical"
-        android:paddingTop="?attr/actionBarSize"> <!-- Add padding to prevent overlap -->
+        android:padding="16dp">
 
-        <ListView
-            android:id="@+id/listViewFavorites"
+        <!-- Search -->
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:divider="@android:color/darker_gray"
-            android:dividerHeight="1dp" />
-    </LinearLayout>
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/rounded_background"
+            android:orientation="horizontal"
+            android:padding="8dp">
 
+            <androidx.appcompat.widget.SearchView
+                android:id="@+id/searchBar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:iconifiedByDefault="false"
+                android:queryHint="*Search Saved Cities*"
+                android:textColor="@android:color/white"
+                android:textColorHint="@android:color/white" />
+
+            <ImageView
+                android:id="@+id/searchIcon"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_search"
+                app:tint="@android:color/white" />
+        </LinearLayout>
+
+        <!-- Saved Cities Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="8dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/rounded_background"
+            android:backgroundTintMode="src_over"
+            android:clipToPadding="false"
+            android:elevation="4dp"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Saved Cities Label -->
+            <TextView
+                android:id="@+id/savedCitiesLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:text="Saved Cities"
+                android:textAlignment="center"
+                android:textColor="@android:color/white"
+                android:textSize="32sp"
+                android:textStyle="bold" />
+
+            <!-- RecyclerView for Bookmarks -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/bookmarksRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="8dp"
+                android:scrollbars="vertical" />
+        </LinearLayout>
+    </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

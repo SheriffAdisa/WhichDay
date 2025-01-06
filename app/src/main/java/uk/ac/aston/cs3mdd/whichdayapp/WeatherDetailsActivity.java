@@ -1,13 +1,26 @@
 package uk.ac.aston.cs3mdd.whichdayapp;
+
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.graphics.Outline;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ListView;
+import android.view.View;
+import android.view.ViewOutlineProvider;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -16,122 +29,248 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-
-
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
+import uk.ac.aston.cs3mdd.whichdayapp.adapters.ForecastAdapter;
 import uk.ac.aston.cs3mdd.whichdayapp.database.AppDatabase;
+import uk.ac.aston.cs3mdd.whichdayapp.database.Bookmark;
 import uk.ac.aston.cs3mdd.whichdayapp.models.DaySummary;
-import uk.ac.aston.cs3mdd.whichdayapp.models.FavoriteCity;
 
 public class WeatherDetailsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
-
-  private GoogleMap mMap; // Google Map instance
-  private double cityLat; // Latitude of the city
-  private double cityLon; // Longitude of the city
-  private String cityName; // City name
-
+  private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
+  private GoogleMap mMap;
+  private double cityLat;
+  private double cityLon;
+  private String cityName;
+  private boolean isBookmarked = false;
+  private MenuItem bookmarkMenuItem;
+  private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_weather_details);
 
-    // Set up the Toolbar
+    setupToolbar();
+    retrieveIntentData();
+    setupMapFragment();
+    requestLocationPermission();
+    checkIfBookmarked();
+    setupUI();
+  }
+
+  private void setupToolbar() {
     Toolbar toolbar = findViewById(R.id.toolbar);
     setSupportActionBar(toolbar);
-
-    // Enable the back button in the action bar
     if (getSupportActionBar() != null) {
       getSupportActionBar().setDisplayHomeAsUpEnabled(true);
       getSupportActionBar().setTitle("Your Recommendation");
     }
+  }
 
-    // Get data passed from MainActivity
+  private void retrieveIntentData() {
     cityLat = getIntent().getDoubleExtra("cityLat", 0.0);
     cityLon = getIntent().getDoubleExtra("cityLon", 0.0);
     cityName = getIntent().getStringExtra("cityName");
 
+    Log.d("IntentData", "City Lat: " + cityLat);
+    Log.d("IntentData", "City Lon: " + cityLon);
+    Log.d("IntentData", "City Name: " + cityName);
+  }
 
-    // Initialize the Map Fragment
-    SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-            .findFragmentById(R.id.mapFragment);
-    if (mapFragment != null) {
-      mapFragment.getMapAsync(this);
+  private void setupMapFragment() {
+    SupportMapFragment mapFragment = SupportMapFragment.newInstance();
+    getSupportFragmentManager()
+            .beginTransaction()
+            .replace(R.id.mapFragment, mapFragment)
+            .commit();
+
+    mapFragment.getMapAsync(this);
+  }
+
+  private void requestLocationPermission() {
+    if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED) {
+      ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
     }
+  }
 
-
-    // Other setup (e.g., ListView, Recommended Day, etc.)
-    setupUI();
-
-    Button buttonAddToFavorites = findViewById(R.id.buttonAddToFavorites);
-    buttonAddToFavorites.setOnClickListener(v -> {
-      String cityName = getIntent().getStringExtra("cityName");
-      if (cityName != null && !cityName.isEmpty()) {
-        AppDatabase db = AppDatabase.getInstance(this);
-        new Thread(() -> {
-          db.favoriteCityDao().insertCity(new FavoriteCity(cityName));
-          runOnUiThread(() -> Toast.makeText(this, "City added to favorites", Toast.LENGTH_SHORT).show());
-        }).start();
-      }
+  private void checkIfBookmarked() {
+    executorService.execute(() -> {
+      isBookmarked = AppDatabase.getInstance(this).bookmarkDao().isBookmarked(cityName);
+      runOnUiThread(this::updateBookmarkIcon);
     });
-
-
   }
 
-  // Configure the Google Map when it’s ready
   @Override
-  public void onMapReady(GoogleMap googleMap) {
-    mMap = googleMap;
-
-    // Add a marker for the city
-    LatLng cityLocation = new LatLng(cityLat, cityLon);
-    mMap.addMarker(new MarkerOptions().position(cityLocation).title("Weather in " + cityName));
-    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(cityLocation, 10));
-  }
-
-  // Setup other UI elements (Recommended Day, ListView)
-  private void setupUI() {
-    TextView recommendedDayView = findViewById(R.id.recommendedDayView);
-    ListView forecastListView = findViewById(R.id.forecastListView);
-
-    // Display recommended day
-    String recommendedDay = getIntent().getStringExtra("recommendedDay");
-    recommendedDayView.setText("Recommended Day: " + recommendedDay);
-
-    // Display 5-day forecast
-    ArrayList<DaySummary> summaries = getIntent().getParcelableArrayListExtra("summaries");
-    ArrayAdapter<DaySummary> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, summaries);
-    forecastListView.setAdapter(adapter);
+  public boolean onCreateOptionsMenu(Menu menu) {
+    getMenuInflater().inflate(R.menu.menu_weather_details, menu);
+    bookmarkMenuItem = menu.findItem(R.id.menu_bookmark);
+    updateBookmarkIcon();
+    return true;
   }
 
   @Override
   public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-
-    if (item.getItemId() == android.R.id.home) {
-      // Navigate back to the previous activity
+    if (item.getItemId() == R.id.menu_bookmark) {
+      toggleBookmark();
+      return true;
+    } else if (item.getItemId() == android.R.id.home) {
       onBackPressed();
       return true;
     }
     return super.onOptionsItemSelected(item);
   }
 
+  private void updateBookmarkIcon() {
+    if (bookmarkMenuItem != null) {
+      bookmarkMenuItem.setIcon(isBookmarked
+              ? R.drawable.ic_addedtobookmarks
+              : R.drawable.ic_addtobookmarks);
+    }
+  }
 
-  private void saveToFavorites() {
-    // Logic to save the recommendation to the database
-    // Example: Show a Toast as a placeholder
-    Toast.makeText(this, "Saved to Favorites!", Toast.LENGTH_SHORT).show();
+  private void updateBookmarkLabel() {
+    TextView bookmarkLabel = findViewById(R.id.bookmarkLabel);
+
+    if (isBookmarked) {
+      bookmarkLabel.setText("City Saved:");
+    } else {
+      bookmarkLabel.setText("Save City");
+    }
+
+    bookmarkLabel.setVisibility(View.VISIBLE);
+  }
+
+
+  private void toggleBookmark() {
+    executorService.execute(() -> {
+      AppDatabase db = AppDatabase.getInstance(this);
+
+      if (isBookmarked) {
+        db.bookmarkDao().deleteByName(cityName);
+        isBookmarked = false;
+      } else {
+        Bookmark bookmark = new Bookmark(cityName, cityLat, cityLon);
+        db.bookmarkDao().insert(bookmark);
+        isBookmarked = true;
+      }
+
+      runOnUiThread(() -> {
+        updateBookmarkIcon();
+        updateBookmarkLabel();
+        String message = isBookmarked
+                ? cityName + " Added to bookmarks"
+                : cityName + " Removed from bookmarks";
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+      });
+    });
   }
 
 
   @Override
-  public boolean onCreateOptionsMenu(Menu menu) {
-    getMenuInflater().inflate(R.menu.menu_weather_details, menu);
-    return true; // Return true to display the menu
+  public void onMapReady(GoogleMap googleMap) {
+    try {
+      mMap = googleMap;
+
+      LatLng cityLocation = new LatLng(cityLat, cityLon);
+      mMap.addMarker(new MarkerOptions()
+              .position(cityLocation)
+              .title("Weather in " + cityName));
+      mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(cityLocation, 10));
+
+      if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+              == PackageManager.PERMISSION_GRANTED) {
+        mMap.setMyLocationEnabled(true);
+      }
+    } catch (Exception e) {
+      Log.e("MapError", "Error loading map: " + e.getMessage(), e);
+      Toast.makeText(this, "Error loading map: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+    }
+  }
+
+  private void setupUI() {
+    // Recommended Day Section
+    TextView recommendedDateView = findViewById(R.id.recommendedDate);
+    ImageView recommendedWeatherIcon = findViewById(R.id.recommendedWeatherIcon);
+    TextView recommendedTempView = findViewById(R.id.recommendedTemp);
+    TextView recommendedDescriptionView = findViewById(R.id.recommendedDescription);
+
+    String recommendedDay = getIntent().getStringExtra("recommendedDay");
+    String recommendedDescription = getIntent().getStringExtra("recommendedDescription");
+    double recommendedTemp = getIntent().getDoubleExtra("recommendedTemp", 0.0);
+
+
+    Log.d("IntentData", "Recommended Day: " + recommendedDay);
+    Log.d("IntentData", "Recommended Description: " + recommendedDescription);
+    Log.d("IntentData", "Recommended Temp: " + recommendedTemp);
+
+
+    if (recommendedDay != null && recommendedDescription != null) {
+      recommendedDateView.setText(formatDate(recommendedDay));
+      recommendedTempView.setText(String.format(Locale.getDefault(), "%.1f°C", recommendedTemp));
+      recommendedDescriptionView.setText(recommendedDescription);
+      recommendedWeatherIcon.setImageResource(getWeatherIcon(recommendedDescription));
+    } else {
+      recommendedDateView.setText("N/A");
+      recommendedTempView.setText("N/A");
+      recommendedDescriptionView.setText("N/A");
+      recommendedWeatherIcon.setImageResource(R.drawable.ic_unknown);
+    }
+
+    // Forecast Section
+    RecyclerView forecastRecyclerView = findViewById(R.id.forecastRecyclerView);
+    ArrayList<DaySummary> summaries = getIntent().getParcelableArrayListExtra("summaries");
+    if (summaries != null && !summaries.isEmpty()) {
+      ForecastAdapter adapter = new ForecastAdapter(summaries);
+      forecastRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+      forecastRecyclerView.setAdapter(adapter);
+    } else {
+      Toast.makeText(this, "No forecast data available.", Toast.LENGTH_SHORT).show();
+    }
+  }
+
+  private String formatDate(String date) {
+    if (date == null || date.isEmpty()) {
+      Log.e("FormatDate", "Date is null or empty");
+      return "N/A";
+    }
+    SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+    SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM/yy", Locale.getDefault());
+    try {
+      return outputFormat.format(inputFormat.parse(date));
+    } catch (ParseException e) {
+      Log.e("FormatDate", "Failed to parse date: " + date, e);
+      return date; // Fallback to the original date
+    }
+  }
+
+
+  private int getWeatherIcon(String description) {
+    if (description == null) return R.drawable.ic_unknown;
+
+    String desc = description.toLowerCase();
+    if (desc.contains("rain")) {
+      return R.drawable.ic_rain;
+    } else if (desc.contains("sun")) {
+      return R.drawable.ic_sunny;
+    } else if (desc.contains("cloud")) {
+      return R.drawable.ic_cloud;
+    } else if (desc.contains("snow")) {
+      return R.drawable.ic_snow;
+    } else if (desc.contains("storm")) {
+      return R.drawable.ic_thunderstorm;
+    } else if (desc.contains("mist")) {
+      return R.drawable.ic_mist;
+    }
+
+    return R.drawable.ic_unknown;
   }
 
 

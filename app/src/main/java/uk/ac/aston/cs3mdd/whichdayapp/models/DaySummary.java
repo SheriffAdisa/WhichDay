@@ -26,11 +26,13 @@ public class DaySummary implements Parcelable{
   public static final Creator<DaySummary> CREATOR = new Creator<DaySummary>() {
     @Override
     public DaySummary createFromParcel(Parcel in) {
+
       return new DaySummary(in);
     }
 
     @Override
     public DaySummary[] newArray(int size) {
+
       return new DaySummary[size];
     }
   };
@@ -45,6 +47,7 @@ public class DaySummary implements Parcelable{
   public double getAvgTemp() {
     return avgTemp;
   }
+
 
   // Getter for the weather description
   public String getDescription() {

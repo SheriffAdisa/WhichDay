@@ -3,26 +3,63 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/FirstFragment">
+    app:startDestination="@id/MainActivity">
 
+    <!--Main Activity-->
     <fragment
-        android:id="@+id/FirstFragment"
-        android:name="uk.ac.aston.cs3mdd.whichdayapp.FirstFragment"
-        android:label="@string/first_fragment_label"
-        tools:layout="@layout/fragment_first">
+        android:id="@+id/MainActivity"
+        android:name="uk.ac.aston.cs3mdd.whichdayapp.MainActivity"
+        android:label="Main Activity"
+        tools:layout="@layout/activity_main">
 
         <action
-            android:id="@+id/action_FirstFragment_to_SecondFragment"
-            app:destination="@id/SecondFragment" />
+            android:id="@+id/action_MainActivity_to_WeatherDetailsActivity"
+            app:destination="@id/WeatherDetailsActivity" />
+        <action
+            android:id="@+id/action_MainActivity_to_FavoritesActivity"
+            app:destination="@id/FavoritesActivity" />
+        <action
+            android:id="@+id/action_MainActivity_to_MapActivity"
+            app:destination="@id/MapActivity" />
+
     </fragment>
+
+    <!--Weather Details Activity-->
     <fragment
-        android:id="@+id/SecondFragment"
-        android:name="uk.ac.aston.cs3mdd.whichdayapp.SecondFragment"
-        android:label="@string/second_fragment_label"
-        tools:layout="@layout/fragment_second">
+        android:id="@+id/weatherDetailsActivity"
+        android:name="uk.ac.aston.cs3mdd.whichdayapp.WeatherDetailsActivity"
+        android:label="Weather Details Activity"
+        tools:layout="@layout/activity_weather_details">
 
         <action
-            android:id="@+id/action_SecondFragment_to_FirstFragment"
-            app:destination="@id/FirstFragment" />
+            android:id="@+id/action_weatherDetailsActivity_to_MainActivity"
+            app:destination="@id/MainActivity" />
+    </fragment>
+
+    <!--Interactive Map-->
+    <fragment
+        android:id="@+id/MapActivity"
+        android:name="uk.ac.aston.cs3mdd.whichdayapp.MapActivity"
+        android:label="Map Activity"
+        tools:layout="@layout/activity_map">
+
+        <action
+            android:id="@+id/action_mapActivity_to_MainActivity"
+            app:destination="@id/MainActivity" />
+        <action
+            android:id="@+id/action_mapActivity_to_FavoritesActivity"
+            app:destination="@id/FavoritesActivity" />
+    </fragment>
+
+    <!--Bookmarks Activity-->
+    <fragment
+        android:id="@+id/FavoritesActivity"
+        android:name="uk.ac.aston.cs3mdd.whichdayapp.FavoritesActivity"
+        android:label="Favorites Activity"
+        tools:layout="@layout/activity_favorites">
+
+        <action
+            android:id="@+id/action_favoritesActivity_to_MainActivity"
+            app:destination="@id/MainActivity" />
     </fragment>
 </navigation>

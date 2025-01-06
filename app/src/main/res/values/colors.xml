@@ -1,11 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#6200EE</color>
-    <color name="colorPrimaryDark">#3700B3</color>
+    <color name="colorPrimary">#000000</color>
+    <color name="colorPrimaryDark">#000000</color>
     <color name="colorAccent">#03DAC5</color>
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
 
-    <color name="buttonBackground">#3F51B5</color>
+    <color name="gradient_start">#87CEEB</color> <!-- Light blue -->
+    <color name="gradient_end">#1E90FF</color> <!-- Darker blue -->
+    <color name="button_color">#A6C8F5</color> <!-- blue button -->
+    <color name="blueish_white">#F8F9FA</color> <!-- Softer white -->
+    <color name="dark_text">#212121</color> <!-- For labels and dynamic text -->
+
+    <color name="semi_transparent_white">#99FFFFFF</color>
+
+
+    <color name="buttonBackground">#A6C8F5</color>
     <color name="buttonTextColor">#FFFFFF</color>
 </resources>

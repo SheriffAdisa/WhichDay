@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -14,6 +15,7 @@
         android:label="WhichDay ?"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:hardwareAccelerated="true"
         android:theme="@style/Theme.WhichDayApp.NoActionBar"
         tools:targetApi="31">
         <activity
@@ -22,7 +24,7 @@
             android:exported="false" />
         <!-- Google Maps API key -->
         <meta-data
-            android:name="com.google.android.geo.API_KEY"
+            android:name="com.google.android.maps.v2.API_KEY"
             android:value="@string/google_maps_key" /> <!-- Main Activiity -->
         <activity
             android:name=".MainActivity"
@@ -34,8 +36,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity android:name=".FavoritesActivity"
             android:label="Favourites"/>
+
+        <activity android:name=".MapActivity"
+            android:exported="true"
+            android:label="Map View">
+        </activity>
 
     </application>
 
