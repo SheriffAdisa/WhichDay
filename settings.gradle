@@ -6,7 +6,7 @@ pluginManagement {
     }
 }
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS) // This mode requires repositories here
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
     repositories {
         google() // Add Google repository
         mavenCentral()

@@ -30,6 +30,7 @@
         android:background="@drawable/rounded_button_background"
         android:drawableEnd="@drawable/ic_delete"
         android:drawablePadding="8dp"
+        android:hapticFeedbackEnabled="true"
         android:padding="8dp"
         android:paddingStart="15dp"
         android:contentDescription="@string/remove_bookmark" />

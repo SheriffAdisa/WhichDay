@@ -74,42 +74,56 @@ public class MainActivity extends AppCompatActivity {
   }
 
   private void fetchWeatherData() {
+    // Get the user input from the EditText, trimming any extra spaces
     String cityNameInput = editTextCity.getText().toString().trim();
 
+    // Check if the city name input is empty and notify the user
     if (cityNameInput.isEmpty()) {
       Toast.makeText(this, "City name cannot be empty.", Toast.LENGTH_SHORT).show();
-      return;
+      return; // Stop execution if input is invalid
     }
 
+    // Show a progress bar to indicate that the API call is in progress
     progressBar.setVisibility(View.VISIBLE);
 
+    // Initialize Retrofit instance for making network requests
     Retrofit retrofit = new Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
+            .baseUrl(BASE_URL) // Set the base URL for the API
+            .addConverterFactory(GsonConverterFactory.create()) // Add a Gson converter for JSON parsing
             .build();
 
+    // Create an instance of the WeatherApi interface
     WeatherApi weatherApi = retrofit.create(WeatherApi.class);
+
+    // Prepare the API call with the user-provided city name and API key
     Call<WeatherResponse> call = weatherApi.getWeatherByCityName(cityNameInput, API_KEY);
 
+    // Execute the API call asynchronously
     call.enqueue(new Callback<WeatherResponse>() {
       @Override
       public void onResponse(Call<WeatherResponse> call, Response<WeatherResponse> response) {
+        // Hide the progress bar once the response is received
         progressBar.setVisibility(View.GONE);
 
+        // Check if the response is successful and contains valid data
         if (response.isSuccessful() && response.body() != null) {
+          // Extract data from the API response
           WeatherResponse weatherResponse = response.body();
           double cityLat = weatherResponse.getCity().getCoord().getLat();
           double cityLon = weatherResponse.getCity().getCoord().getLon();
           String cityName = weatherResponse.getCity().getName();
 
+          // Process the weather data: group forecasts by day and calculate summaries
           List<DaySummary> summaries = calculateDailySummaries(groupForecastsByDay(weatherResponse.getList()));
-          DaySummary bestDay = getBestDay(summaries);
+          DaySummary bestDay = getBestDay(summaries); // Determine the best day for activities
 
+          // Prepare an Intent to navigate to the WeatherDetailsActivity
           Intent intent = new Intent(MainActivity.this, WeatherDetailsActivity.class);
-          intent.putExtra("cityLat", cityLat);
-          intent.putExtra("cityLon", cityLon);
-          intent.putExtra("cityName", cityName);
+          intent.putExtra("cityLat", cityLat); // Pass the city's latitude
+          intent.putExtra("cityLon", cityLon); // Pass the city's longitude
+          intent.putExtra("cityName", cityName); // Pass the city's name
 
+          // Pass recommendation details if available, otherwise pass defaults
           if (bestDay != null) {
             intent.putExtra("recommendedDay", bestDay.getDate());
             intent.putExtra("recommendedDescription", bestDay.getDescription());
@@ -120,22 +134,29 @@ public class MainActivity extends AppCompatActivity {
             intent.putExtra("recommendedTemp", 0.0);
           }
 
+          // Attach the daily summaries to the Intent
           intent.putParcelableArrayListExtra("summaries", new ArrayList<>(summaries));
+
+          // Start the WeatherDetailsActivity with the prepared Intent
           startActivity(intent);
 
+          // Save the city name to the recent searches list for future reference
           saveToRecentSearches(cityNameInput);
         } else {
+          // Notify the user if the city name is invalid or data is unavailable
           Toast.makeText(MainActivity.this, "Invalid city name. Please try again.", Toast.LENGTH_SHORT).show();
         }
       }
 
       @Override
       public void onFailure(Call<WeatherResponse> call, Throwable t) {
+        // Hide the progress bar and show an error message if the API request fails
         progressBar.setVisibility(View.GONE);
         Toast.makeText(MainActivity.this, "API request failed: " + t.getMessage(), Toast.LENGTH_SHORT).show();
       }
     });
   }
+
 
   private List<String> getRecentSearches() {
     SharedPreferences prefs = getSharedPreferences("RecentSearchesPrefs", MODE_PRIVATE);
@@ -154,9 +175,9 @@ public class MainActivity extends AppCompatActivity {
     // Get existing searches
     Set<String> recentSearches = prefs.getStringSet("recentSearches", new LinkedHashSet<>());
 
-    // Ensure the city is unique and at the top
+    // Ensure the city hasn't been said before and is at the top
     if (recentSearches.contains(cityName)) {
-      recentSearches.remove(cityName); // Remove duplicate
+      recentSearches.remove(cityName); // Remove duplicates
     }
     recentSearches.add(cityName); // Add new search to the set
 

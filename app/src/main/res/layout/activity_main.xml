@@ -1,10 +1,11 @@
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/MainActivity"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/sky_background">
-
+    android:background="@drawable/sky_background"
+    tools:context=".MainActivity">
 
 
     <com.google.android.material.appbar.AppBarLayout
@@ -17,8 +18,8 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/black"
-            app:titleTextColor="@android:color/white"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            app:titleTextColor="@android:color/white" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <ScrollView
@@ -37,26 +38,26 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="140sp"
+                android:layout_marginBottom="40dp"
+                android:background="@drawable/rounded_background"
                 android:orientation="vertical"
                 android:padding="16dp"
-                android:layout_gravity="center"
-                android:textAlignment="center"
-                android:background="@drawable/rounded_background"
-                android:layout_marginTop="140sp"
-                android:layout_marginBottom="40dp">
+                android:textAlignment="center">
 
                 <!-- City Search Section -->
                 <TextView
                     android:id="@+id/enter_city_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textAlignment="center"
                     android:layout_gravity="center"
                     android:layout_marginBottom="10dp"
+                    android:gravity="center"
                     android:text="Enter your city:"
+                    android:textAlignment="center"
                     android:textColor="@color/blueish_white"
                     android:textSize="32sp"
-                    android:gravity="center"
                     android:textStyle="bold" />
 
                 <!-- Search Box -->
@@ -74,36 +75,37 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="2"
+                        android:background="@android:color/transparent"
                         android:hint="*e.g. London*"
                         android:padding="6dp"
-                        android:background="@android:color/transparent"
+                        android:textAlignment="center"
                         android:textColor="@android:color/white"
                         android:textColorHint="@android:color/darker_gray"
-                        android:textAlignment="center"
                         android:textSize="22sp" />
 
                     <ImageView
                         android:id="@+id/search_icon"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
+                        android:backgroundTint="@color/white"
                         android:contentDescription="Search Icon"
-                        android:src="@drawable/ic_search_white"
-                        android:backgroundTint="@color/white" />
+                        android:src="@drawable/ic_search_white" />
                 </LinearLayout>
 
                 <!-- Button to Fetch Weather -->
                 <Button
                     android:id="@+id/buttonFetchWeather"
                     android:layout_width="match_parent"
-                    android:layout_gravity="center"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="20dp"
                     android:backgroundTint="#99A6C8F5"
-                    android:textColor="@color/white"
+                    android:padding="13dp"
                     android:text="SEARCH CITY"
+                    android:textColor="@color/white"
                     android:textSize="22sp"
                     android:textStyle="bold"
-                    android:padding="13dp"
-                    android:layout_marginBottom="20dp" />
+                    android:hapticFeedbackEnabled="true"/>
 
                 <ProgressBar
                     android:id="@+id/progressBar"
@@ -118,24 +120,24 @@
                 android:id="@+id/recentSearchesContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@drawable/rounded_background"
+                android:gravity="center_horizontal"
                 android:orientation="vertical"
                 android:padding="8dp"
-                android:textAlignment="center"
-                android:background="@drawable/rounded_background"
-                android:gravity="center_horizontal">
+                android:textAlignment="center">
 
                 <TextView
                     android:id="@+id/recently_searched_label"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="20dp"
                     android:gravity="center"
                     android:text="Recently Searched:"
                     android:textColor="@android:color/white"
                     android:textSize="28sp"
-                    android:textStyle="bold"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="20dp" />
+                    android:textStyle="bold" />
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

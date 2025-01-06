@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/WeatherDetailsActivity"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/sky_background">
+    android:background="@drawable/sky_background"
+    tools:context=".WeatherDetailsActivity">
 
     <!-- Toolbar -->
     <androidx.appcompat.widget.Toolbar
@@ -12,20 +14,20 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
         app:title="Recommendation"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        app:titleTextColor="@android:color/white" >
+        app:titleTextColor="@android:color/white">
 
         <TextView
-        android:id="@+id/bookmarkLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:paddingEnd="10dp"
-        android:text="Add to Bookmark:"
-        android:textColor="@android:color/white"
-        android:visibility="gone" />
+            android:id="@+id/bookmarkLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:paddingEnd="10dp"
+            android:text="Add to Bookmark:"
+            android:textColor="@android:color/white"
+            android:visibility="gone" />
     </androidx.appcompat.widget.Toolbar>
 
     <!-- Main Content -->
@@ -45,82 +47,82 @@
                 android:id="@+id/recommendedDayContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
+                android:layout_marginBottom="16dp"
 
                 android:background="@drawable/rounded_background_black"
-                android:padding="16dp"
-                android:layout_marginBottom="16dp">
+                android:orientation="vertical"
+                android:padding="16dp">
 
                 <TextView
                     android:id="@+id/recommendedDayLabel"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Recommended Day:"
-                    android:textSize="24sp"
-                    android:textStyle="bold"
-                    android:textColor="@android:color/white"
                     android:layout_marginBottom="8dp"
-                    android:textAlignment="center" />
+                    android:text="Recommended Day:"
+                    android:textAlignment="center"
+                    android:textColor="@android:color/white"
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="0dp" >
+                    android:padding="0dp">
 
                     <!-- Date -->
                     <TextView
                         android:id="@+id/recommendedDate"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
                         android:text="DD/MM/YY"
+                        android:textColor="@android:color/white"
                         android:textSize="20sp"
                         android:textStyle="bold"
-                        android:textColor="@android:color/white"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        android:layout_marginStart="16dp" />
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
                     <!-- Weather Icon -->
                     <ImageView
                         android:id="@+id/recommendedWeatherIcon"
                         android:layout_width="32dp"
                         android:layout_height="32dp"
+                        android:layout_marginStart="16dp"
                         android:contentDescription="@string/weather_icon"
-                        app:layout_constraintStart_toEndOf="@id/recommendedDate"
-                        app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        android:layout_marginStart="16dp" />
+                        app:layout_constraintStart_toEndOf="@id/recommendedDate"
+                        app:layout_constraintTop_toTopOf="parent" />
 
                     <!-- Temperature -->
                     <TextView
                         android:id="@+id/recommendedTemp"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="14dp"
                         android:text="0°C"
+                        android:textColor="@android:color/white"
                         android:textSize="18sp"
                         android:textStyle="bold"
-                        android:textColor="@android:color/white"
-                        app:layout_constraintStart_toEndOf="@id/recommendedWeatherIcon"
-                        app:layout_constraintEnd_toStartOf="@id/recommendedDescription"
-                        app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        android:layout_marginStart="16dp"
-                        android:layout_marginEnd="14dp" />
+                        app:layout_constraintEnd_toStartOf="@id/recommendedDescription"
+                        app:layout_constraintStart_toEndOf="@id/recommendedWeatherIcon"
+                        app:layout_constraintTop_toTopOf="parent" />
 
                     <!-- Description -->
                     <TextView
                         android:id="@+id/recommendedDescription"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginEnd="16dp"
                         android:text="[Light Rain]"
+                        android:textColor="@android:color/white"
                         android:textSize="18sp"
                         android:textStyle="bold"
-                        android:textColor="@android:color/white"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        android:layout_marginEnd="16dp" />
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </LinearLayout>
 
@@ -132,8 +134,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:layout_marginBottom="16dp"
-                android:padding="10dp"
-                android:background="@drawable/rounded_background">
+                android:background="@drawable/rounded_background"
+                android:padding="10dp">
 
                 <FrameLayout
                     android:id="@+id/mapFragment"
@@ -147,9 +149,9 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
                 android:background="@drawable/rounded_background"
                 android:orientation="vertical"
-                android:layout_marginTop="15dp"
                 android:padding="16dp">
 
                 <TextView
@@ -170,9 +172,9 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:scrollbars="none"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/mapFragment"
-                    app:layout_constraintEnd_toEndOf="parent" />
+                    app:layout_constraintTop_toBottomOf="@id/mapFragment" />
 
 
             </LinearLayout>

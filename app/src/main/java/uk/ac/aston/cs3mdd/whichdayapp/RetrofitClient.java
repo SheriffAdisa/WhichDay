@@ -2,7 +2,7 @@ package uk.ac.aston.cs3mdd.whichdayapp;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-//Class if for a retrofit instance for making API calls
+//retrofit instance for making API calls
 public class RetrofitClient {
 
   private static Retrofit retrofit = null;

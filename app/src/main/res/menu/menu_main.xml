@@ -5,6 +5,7 @@
         android:id="@+id/menu_bookmarks"
         android:title="Bookmarks"
         android:icon="@drawable/ic_showbookmarks"
+        android:hapticFeedbackEnabled="true"
         app:showAsAction="always" />
     <item
         android:id="@+id/menu_view_map"
